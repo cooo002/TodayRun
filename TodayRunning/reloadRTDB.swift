@@ -21,10 +21,11 @@ class reloadRTDB: UIViewController {
 //    var captinImgArr : Array<String> = [] // note: 반장 이미지를 저장하는 배열
     
     var recomendSpotInfoDic : Dictionary<String, Any>?
+    var recomendSpotInfoArr : Array<Dictionary<String, Any>> = []
     
     
     
-    func noticeInfoReload(select : (Void) -> Void){
+    func noticeInfoReload( _ log : (() -> Void)?, _ completion : @escaping () -> (Void) ){
         var ref = Database.database().reference()
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var signUp = appDelegate.userProperty.readBool(key: "signUP")
@@ -51,16 +52,17 @@ class reloadRTDB: UIViewController {
                         print("value의 타입은? \(type(of: value))")
                         print("Divtionnary 타입을 저장하도록하는 infArr의 저장돈 값은? : \(self.infoArr)")
                         print("reloadRTDB에서 noticeInfoReload메소드 실행!!")
-                        
                     }
+                    completion()
                     }
-                DispatchQueue.global().sync {
-                 appDelegate.selectVC(signUp)
-                }
+//                DispatchQueue.global().sync {
+//                 appDelegate.selectVC(signUp)
+//                }
             }
              else{
                 print("reloadRTDB에서 noticeInfoReload메소드 실행!!")
-                appDelegate.selectVC(signUp)
+//                appDelegate.selectVC(signUp)
+                completion()
             }
         })
     }
@@ -109,13 +111,25 @@ class reloadRTDB: UIViewController {
     }
     
     //note: 추천스팟에 대한 데이터를 RTDB에서 불러오는 것
-    func recommendSpotReload(_ completion: () -> (Void)){
+    func recommendSpotReload(_ completion: @escaping () -> (Void)){
         var ref = Database.database().reference()
         ref.child("ios/recomendRouteInfo").observe(DataEventType.value, with: { (snapshot) in
             //note: 값이 변경될 때 마다 실행된다.
             self.recomendSpotInfoDic = snapshot.value as? Dictionary<String, Any>
             
-            
+            if self.recomendSpotInfoDic != nil{
+                for (key, value) in self.recomendSpotInfoDic!{
+                    self.recomendSpotInfoArr.append(value as! [String : Any])
+                }
+                print("현재 recomendSpotArr에 저장된 데이터는 : \(self.recomendSpotInfoArr)")
+                print("recomendSpotArr에서 첫번째 인덱스에 저장된 스파에대한 설명은 \(self.recomendSpotInfoArr[0]["title"])")
+                completion() // note: AppDelegate에서 클로져 전달인수로 그냥 데이터 불러왔다는 로그를 찍어주는 로직을 전송해주고 이를 여기서 실행한다. 그러면 화면에 데이터를 다 불러왔다고 log가 찍힐 것이다 .
+                
+            }
+            else{
+                //note: 이 부분은  recomendSpotInfoDic에 아무 데이터도 들어오지 않았을 때 실행되는 로직
+                print("현재 recomendSpotDic에 아무 정보도 없습니다.")
+            }
             
             //note: 이 부분은 그냥 파싱한 데이터를 확인하는 용도이다.
             print("recomendRouteInfo: \(self.recomendSpotInfoDic)")

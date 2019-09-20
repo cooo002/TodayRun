@@ -42,7 +42,7 @@ class MainViewController: UITableViewController, UINavigationControllerDelegate,
         self.cell?.boardImg.clipsToBounds = true
 
         self.cell!.boardTtitle.text = self.appDelegate.ReloadRTDB.titleArr[indexPath.row]
-        print("cell 이 하나씩 만들어질 때 info에 저장된 값 확인용!: \(  type(of: self.appDelegate.ReloadRTDB.infoArr[indexPath.row]["numOfPeople"])    )")
+        print("cell 이 하나씩 만들어질 때 info에 저장된 값 확인용!: \(  type(of: self.appDelegate.ReloadRTDB.infoArr[indexPath.row]["numOfPeople"]))")
         self.cell!.attempPersonNum.text = String(self.appDelegate.ReloadRTDB.infoArr[indexPath.row]["numOfPeople"] as! Int)
         self.cell!.boardLocation.text = self.appDelegate.ReloadRTDB.infoArr[indexPath.row]["centerLocation"] as! String
         print("attempPersonUid의 타입은 \(type(of: self.appDelegate.ReloadRTDB.infoArr[indexPath.row]["attempPersonUid"] as! Array<String>))")

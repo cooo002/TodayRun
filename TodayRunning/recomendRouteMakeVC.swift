@@ -132,38 +132,56 @@ class recomendRouteMakeVC : UIViewController, UIScrollViewDelegate, UINavigation
         request.addValue("ra3fwyfwi4", forHTTPHeaderField: "X-NCP-APIGW-API-KEY-ID")
         request.addValue("h9RByDazaDLqsnS4jYun5vG4IrmCyk8C7buM0Jr7", forHTTPHeaderField: "X-NCP-APIGW-API-KEY")
         
-        
         let task = URLSession.shared.dataTask(with: request){ data , response , error in
             if let e = error{
                 NSLog("에러 내용은? \(error)")
                 return
             }
             
-            let json = try! JSONSerialization.jsonObject(with: data!, options: []) as! [String : Any]
+            let json = try! JSONSerialization.jsonObject(with: data!, options: []) as? [String : Any]
             
             //            var places = json["places"] as! [[String : Any]]
-            var addresses = json["addresses"] as! [[String : Any]]
+            var addresses = json?["addresses"] as? [[String : Any]]
+            print("address[0]의 들어가는 값 확인용 로그 \(addresses)")
             
-            var roadAddress = addresses[0]["roadAddress"]
-            self.recomendSpotAddress = addresses[0]["roadAddress"] as! String
-            self.cameraLat = Double( addresses[0]["y"] as! String)!
-            self.cameraLng = Double( addresses[0]["x"] as! String)!
+            if addresses!.isEmpty{
+//                  self.alertForNotMaiching()
+                print("일치하는 검색 결과가 없다")
+                DispatchQueue.main.sync {
+                    let alert = UIAlertController(title: nil, message: "일치하는 지역이 없습니다 좀 더 정확히 입력해주세요", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                }
+            }
+                
+            else{
             
-            //            self.DEFAULT_CAMERA_POSITION = NMFCameraPosition(NMGLatLng(lat: lat , lng: lng ), zoom: 14, tilt: 0, heading: 0)
+                var roadAddress = addresses?[0]
+                
+                
+                self.recomendSpotAddress = roadAddress?["roadAddress"] as! String
             
-            //note: any타입을 바로 double로 바꿀수는 없다 그래서 위와 같이 일단 string으로 바꾼 후 다시 double로 바꾸면된다 .
-            //            print("응답 결과:\n\(places)")
-            print("응답 결과:\n\(roadAddress as! String)") // note: 검색한 중심 지역의 위도가 저장되어있다.
-            print("roadAddress의 타입? : \(type(of:roadAddress))") //note : any 타입이다
-            print("위도 \n \(self.cameraLat), 타입은 \(type(of: self.cameraLat))")
-            print("경도 \n \(self.cameraLng)")
+                self.recomendSpotAddress = roadAddress?["roadAddress"] as! String
+                self.cameraLat = Double( roadAddress?["y"] as! String)!
+                self.cameraLng = Double( roadAddress?["x"] as! String)!
+            //                print("응답 결과:\n\(roadAddress as! String)") // note: 검색한 중심 지역의 위도가 저장되어있다.
+                print("roadAddress의 저장된 데이터는 : \(roadAddress)")
+                print("roadAddress의 타입? : \(type(of:roadAddress))") //note : any 타입이다
+                print("위도 \n \(self.cameraLat), 타입은 \(type(of: self.cameraLat))")
+                print("경도 \n \(self.cameraLng)")
             //         광진구
-            completion()
+                completion()
+            }
         }
-        
         task.resume()
-        
     }
+    
+    func alertForNotMaiching(){
+        let alert = UIAlertController(title: nil, message: "일치하는 지역이 없습니다 다시 입력해주세요", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         

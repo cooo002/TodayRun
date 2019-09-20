@@ -13,7 +13,9 @@ import SDWebImage
 import Floaty
 class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate{
     
-    var pageImgArr = ["fallCourse.png", "seoulCourse.png"]
+    var appDelegate = UIApplication.shared.delegate as! AppDelegate
+    var pageImgArr = ["fallCourse.png", "seoulCourse.png"]//note: 이 이미지는 상단의 추천스팟 이미지 뷰에 들어가는 이미지이다 .
+    
  
     
     @IBOutlet weak var verticalScrollView: UIScrollView!
@@ -31,7 +33,7 @@ class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+        return self.appDelegate.ReloadRTDB.recomendSpotInfoArr.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -39,6 +41,12 @@ class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSo
        
         cell.courseImg.layer.cornerRadius = cell.courseImg.frame.width / 2
         cell.courseImg.clipsToBounds = true
+        cell.courseName.text =  self.appDelegate.ReloadRTDB.recomendSpotInfoArr[indexPath.row]["title"] as! String
+        cell.courseAddress.text = self.appDelegate.ReloadRTDB.recomendSpotInfoArr[indexPath.row]["address"] as! String
+        cell.courseImg.sd_setImage(with: URL(string: self.appDelegate.ReloadRTDB.recomendSpotInfoArr[indexPath.row]["imgUrl"] as! String))
+//        cell.courseName.text
+//        cell.courseAddress.text
+        
         
         return cell
     }
@@ -78,6 +86,9 @@ class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         floaty.size = 30
         floaty.itemSize = 29
         self.view.addSubview(floaty)
+    }
+    override func viewWillAppear(_ animated: Bool) {
+//        self.recomandTableView.reloadData()
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

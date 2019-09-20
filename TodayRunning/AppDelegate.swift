@@ -170,8 +170,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
 //        self.plist.synchronize()
         //note : 도대체 왜 메인 스토리 보드로 넘어가고 나서야 noticeInfoReload이 실행되는가??
         DispatchQueue.global().sync {
-            self.ReloadRTDB.noticeInfoReload(){_ in
-                print("RTDB에서 데이터를 불러오기 시작했음")
+            self.ReloadRTDB.noticeInfoReload(nil){
+                var signUp =  self.userProperty.readBool(key: "signUp")
+                if signUp {
+                    
+                    let secondStoryboard = UIStoryboard(name: "Second", bundle: nil)
+                    // 뷰 컨트롤러 인스턴스
+                    let viewController = secondStoryboard.instantiateViewController(withIdentifier: "secondStoryBoard")
+                    
+                    // 윈도우의 루트 뷰 컨트롤러 설정
+                    self.window?.rootViewController = viewController
+                    
+                    
+                    
+                }
+                    
+                else{ // note: 회원가입을 했던 적인 없는 경우
+                    let MainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                    // 뷰 컨트롤러 인스턴스
+                    let viewController = MainStoryboard.instantiateViewController(withIdentifier: "mainStoryBoard")
+                    
+                    // 윈도우의 루트 뷰 컨트롤러 설정
+                    self.window?.rootViewController = viewController
+                    
+                }
+                // 이제 화면에 보여주자.
+                self.window?.makeKeyAndVisible()
+            }
+              
+        
+            self.ReloadRTDB.recommendSpotReload(){
+                print("추천스팟에 대한 데이터를 RTDB에서 전부 불러왔다")
             }
         }
         

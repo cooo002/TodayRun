@@ -50,17 +50,31 @@ class TargetLocationMapVC: UIViewController, NMFMapViewDelegate {
     
     @IBAction func moveCamera(_ sender: Any) { //note : 중심지역을 검색하면 실행되는 액션 메소드
         
-
-        DispatchQueue.global().sync {
-            self.areaNameToGeocoding()
-        }
-        DispatchQueue.global().sync {
-            self.addMapView(lat: self.defaultLat , lng: self.defaultLng)
+        self.areaNameToGeocoding() {// note : 이부분에 클로져 매개변수로 전달할 내용을 코딩하자(그 안에 내용은 검색 결과로 맵을 띄우는 로직잉여야한다. )
+            DispatchQueue.main.sync {
+                
+                
+                self.NaverMapView = NMFNaverMapView(frame: CGRect(x: 0, y: 0, width: self.mapView.frame.width, height: self.mapView.frame.height))
+                self.NaverMapView!.delegate = self
+                var DEFAULT_CAMERA_POSITION = NMFCameraPosition(NMGLatLng(lat: self.defaultLat , lng: self.defaultLng ), zoom: 14, tilt: 0, heading: 0)
+                self.NaverMapView!.mapView.moveCamera(NMFCameraUpdate(position: DEFAULT_CAMERA_POSITION))
+                //
+                //        let polyline = NMFPolylineOverlay(points: [
+                //            NMGLatLng(lat: 37.57152, lng: 126.97714),
+                //            NMGLatLng(lat: 37.56607, lng: 126.98268),
+                //            NMGLatLng(lat: 37.56445, lng: 126.97707),
+                //            NMGLatLng(lat: 37.55855, lng: 126.97822)])
+                //        polyline?.mapView = self.NaverMapView?.mapView
+                
+                //            view.removeFromSuperview()//note: 원래 뷰의 서브 뷰 자체를 "view"라는 변수로 할당했는데 그것의 서브뷰를 없애기 위해서는 해당
+                // 해당 서브 뷰 자체를 없애면 된다. 그럴러면 해당 서브 뷰의 superView를 없애주면 된다.
+                self.mapView.addSubview(self.NaverMapView!)
+        
         }
 //
     }
     
-    
+    }
     func didTapMapView(_ point: CGPoint, latLng latlng: NMGLatLng) {
 //    지도를 탭 했을 때 실행되는 메소드
         //        Note: 탭을 했을 때 세그먼트 컨트롤러의 인덱스 번호에 따라 도착지 인지 출발지 인지 체크하고 그에 따라 저장하자
@@ -100,7 +114,7 @@ class TargetLocationMapVC: UIViewController, NMFMapViewDelegate {
     
     func addMapView( lat : Double, lng : Double){ // note 원래 뷰의 속한 가장 첫번재 서브뷰를 삭제하고 새로운 뷰룰 서브뷰로 등록하고
         //화면에 띄우는 방법
-        var view =  self.mapView.subviews[0]//note: 원래 뷰의 서브 뷰를 변수에 할당한다.
+//        var view =  self.mapView.subviews[0]//note: 원래 뷰의 서브 뷰를 변수에 할당한다.
         self.NaverMapView = NMFNaverMapView(frame: CGRect(x: 0, y: 0, width: self.mapView.frame.width, height: self.mapView.frame.height))
         self.NaverMapView!.delegate = self
         var DEFAULT_CAMERA_POSITION = NMFCameraPosition(NMGLatLng(lat: lat , lng: lng ), zoom: 14, tilt: 0, heading: 0)
@@ -131,7 +145,7 @@ class TargetLocationMapVC: UIViewController, NMFMapViewDelegate {
     
    
 
-    func areaNameToGeocoding(){
+    func areaNameToGeocoding(_ completion : @escaping () -> (Void)){
         var lat : Double!
         var lng : Double!
         let urlStr = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=\(self.areaName.text!) &coordinate=127.1054328,37.3595963"
@@ -151,26 +165,41 @@ class TargetLocationMapVC: UIViewController, NMFMapViewDelegate {
                 return
             }
             
-            let json = try! JSONSerialization.jsonObject(with: data!, options: []) as! [String : Any]
+            let json = try! JSONSerialization.jsonObject(with: data!, options: []) as? [String : Any]
             
             //            var places = json["places"] as! [[String : Any]]
-            var addresses = json["addresses"] as! [[String : Any]]
+            var addresses = json?["addresses"] as? [[String : Any]]
             
-            var roadAddress = addresses[0]["roadAddress"]
-            self.centerLocation = addresses[0]["roadAddress"] as! String
-            self.defaultLat = Double( addresses[0]["y"] as! String)!
-            self.defaultLng = Double( addresses[0]["x"] as! String)!
+            if addresses!.isEmpty{
+                
+                print("일치하는 검색 결과가 없다")
+                DispatchQueue.main.sync {
+                    let alert = UIAlertController(title: nil, message: "일치하는 지역이 없습니다 좀 더 정확히 입력해주세요", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                }
+            }
+            else{
+                
+                var roadAddress = addresses?[0]
+                self.centerLocation = roadAddress?["roadAddress"] as! String
+                self.defaultLat = Double( roadAddress?["y"] as! String)!
+                self.defaultLng = Double( roadAddress?["x"] as! String)!
+                
+                //            self.DEFAULT_CAMERA_POSITION = NMFCameraPosition(NMGLatLng(lat: lat , lng: lng ), zoom: 14, tilt: 0, heading: 0)
+                
+                //note: any타입을 바로 double로 바꿀수는 없다 그래서 위와 같이 일단 string으로 바꾼 후 다시 double로 바꾸면된다 .
+                //            print("응답 결과:\n\(places)")
+                completion()
+                print("응답 결과:\n\(roadAddress)") // note: 검색한 중심 지역의 위도가 저장되어있다.
+                print("roadAddress의 타입? : \(type(of:roadAddress))") //note : any 타입이다
+                print("위도 \n \(self.defaultLat), 타입은 \(type(of: self.defaultLat))")
+                print("경도 \n \(self.defaultLng)")
+                //         광진구
+                
+            }
             
-//            self.DEFAULT_CAMERA_POSITION = NMFCameraPosition(NMGLatLng(lat: lat , lng: lng ), zoom: 14, tilt: 0, heading: 0)
-       
-            //note: any타입을 바로 double로 바꿀수는 없다 그래서 위와 같이 일단 string으로 바꾼 후 다시 double로 바꾸면된다 .
-            //            print("응답 결과:\n\(places)")
-            print("응답 결과:\n\(roadAddress as! String)") // note: 검색한 중심 지역의 위도가 저장되어있다.
-            print("roadAddress의 타입? : \(type(of:roadAddress))") //note : any 타입이다
-            print("위도 \n \(self.defaultLat), 타입은 \(type(of: self.defaultLat))")
-            print("경도 \n \(self.defaultLng)")
-//         광진구
-         
+      
         }
         
         task.resume()
@@ -180,8 +209,13 @@ class TargetLocationMapVC: UIViewController, NMFMapViewDelegate {
     @objc func areaMarkerTask(_ sender : Any){
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.boardInfo.location = self.centerLocation
+        appDelegate.ReloadRTDB.noticeInfoReload(nil) {
+            
+            self.navigationController?.popViewController(animated: true)
+            
+        }
         
-        self.navigationController?.popViewController(animated: true)
+        
     }
     
     override func viewDidLoad() {
