@@ -7,12 +7,14 @@
 //
 
 import UIKit
+import Firebase
 
-class ViewController: UIViewController {
+class ViewController: UITableViewController{
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
     }
 
 
