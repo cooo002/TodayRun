@@ -90,6 +90,7 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         var departureMarker = NMFMarker()
         var destinationMarker = NMFMarker()
         
+        self.notice.isEditable = false
         self.notice.text = self.crewNotice//note: 출발지에서 받아온 정보를 도착지에 뷰에 적용시키는 부분이다 .
         self.crewName.text = self.crewTitle
         

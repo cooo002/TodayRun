@@ -202,6 +202,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
             self.ReloadRTDB.recommendSpotReload(){
                 print("추천스팟에 대한 데이터를 RTDB에서 전부 불러왔다")
             }
+
+                
+            
+            self.ReloadRTDB.reloadOpenAPIData()
+            
         }
         
      

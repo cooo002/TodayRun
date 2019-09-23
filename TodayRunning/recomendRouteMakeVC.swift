@@ -82,21 +82,7 @@ class recomendRouteMakeVC : UIViewController, UIScrollViewDelegate, UINavigation
             self.Marker.mapView = self.NaverMapView?.mapView
             
         }
-        // 추천 스팟을 저장해줘야함(위도와 경도를 dataSendBase 인스턴스에 위도, 경도를 담당하는 저장 프로퍼티에 저장한다.)
-        
-//
-//        if self.viewSelectSegment.selectedSegmentIndex == 1{//note: 출발지를 선택할 때
-//            appDelegate.boardInfo.departureLat = latlng.lat
-//            appDelegate.boardInfo.departureLng = latlng.lng
-//            print("boardInfo의 저장된 춟발지 위도\( appDelegate.boardInfo.departureLat), 경도\(appDelegate.boardInfo.departureLng)")
-//
-//        }
-//        else{ // note: 도착지를 선택할 때
-//            appDelegate.boardInfo.destinationLat = latlng.lat
-//            appDelegate.boardInfo.destinationLng = latlng.lng
-//            print("boardInfo의 저장된 도착지 위도\( appDelegate.boardInfo.destinationLat), 경도\(appDelegate.boardInfo.destinationLng)")
-//        }
-        
+
     }
     
     func addMapView( lat : Double, lng : Double){ // note 원래 뷰의 속한 가장 첫번재 서브뷰를 삭제하고 새로운 뷰룰 서브뷰로 등록하고
@@ -106,16 +92,6 @@ class recomendRouteMakeVC : UIViewController, UIScrollViewDelegate, UINavigation
         self.NaverMapView!.delegate = self
         var DEFAULT_CAMERA_POSITION = NMFCameraPosition(NMGLatLng(lat: cameraLat , lng: cameraLng ), zoom: 14, tilt: 0, heading: 0)
         self.NaverMapView!.mapView.moveCamera(NMFCameraUpdate(position: DEFAULT_CAMERA_POSITION))
-        //
-        //        let polyline = NMFPolylineOverlay(points: [
-        //            NMGLatLng(lat: 37.57152, lng: 126.97714),
-        //            NMGLatLng(lat: 37.56607, lng: 126.98268),
-        //            NMGLatLng(lat: 37.56445, lng: 126.97707),
-        //            NMGLatLng(lat: 37.55855, lng: 126.97822)])
-        //        polyline?.mapView = self.NaverMapView?.mapView
-        
-//        view.removeFromSuperview()//note: 원래 뷰의 서브 뷰 자체를 "view"라는 변수로 할당했는데 그것의 서브뷰를 없애기 위해서는 해당
-        // 해당 서브 뷰 자체를 없애면 된다. 그럴러면 해당 서브 뷰의 superView를 없애주면 된다.
         self.recomendMapView.addSubview(self.NaverMapView!)
     }
     

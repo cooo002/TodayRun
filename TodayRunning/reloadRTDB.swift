@@ -11,18 +11,26 @@ import Firebase
 import UIKit
 
 class reloadRTDB: UIViewController {
+    //note: RTDB에서 방정보를 가져와서 그것을 저장하는 dic, arr 이다.
     var notictlist : Dictionary<String, Any>?
     var titleArr : Array<String>  = []// 각 방의 타이틀이 들어간다
-//    var infoArr: Dictionary<String, Any>? //각 방의 정보를 가지고 있다.( 0번 인덱스에 딕셔너리 형태로 값들이 저장되어 있다.
     var infoArr: Array<Dictionary<String, Any>> = []
+    
+    //note: RTDB에서 유저 정보를 가져와서 그것을 저장하는 di,arr 이다.
     var attempPersonNumArr : Array<String> = [] // note: 타이틀을 저장하는 배열
     var userInfoDic : Dictionary<String, String>?
-//    var locationArr : Array<String> = [] // note: 정원 수를 저장하느 배열
-//    var captinImgArr : Array<String> = [] // note: 반장 이미지를 저장하는 배열
-    
+
+    //note : RTDBD에서 추천스팟에 대한 정보를 가져와서 그것을 저장하는 dic, arr 이다.
     var recomendSpotInfoDic : Dictionary<String, Any>?
     var recomendSpotInfoArr : Array<Dictionary<String, Any>> = []
     
+    //note: RTDBD에서 OpenAPI의 정보를 가져와서 저장하는  arr 이다 .
+    var OpenAPIDataInfoDic : Dictionary<String, Any>?
+    var OpenAPIDataInfoArr : Array<Dictionary<String, Any>> = []
+    var OpenAPIDataInfoForRecomendArr : Array<Dictionary<String, Any>> = []
+    
+    //note: RTDB에서 검색한 특정 추천스팟에 대한 정보
+    var recomendSpotMadeUserDic : Dictionary<String, Any>?
     
     
     func noticeInfoReload( _ log : (() -> Void)?, _ completion : @escaping () -> (Void) ){
@@ -137,7 +145,101 @@ class reloadRTDB: UIViewController {
             
         })
         
-        
+    }
+    
+    
+//     func reloadOpenAPIData(){
+//            var ref = Database.database().reference()
+//
+//
+//            ref.child("OpenApiData/DATA/DATA").observe(DataEventType.value) { (snapshot) in
+//
+//                DispatchQueue.global().async {
+//                    // note : 내가 이부분에 이렇게 dispatchQueue를 사용해서 작업순서를 조정하려함
+//
+//    //                self.OpenAPIDataInfoArr =  (snapshot.value as? Array<Dictionary<String, Any>>)!
+//                    self.OpenAPIDataInfoDic =  snapshot.value as? Dictionary<String, Any>
+//
+//
+//
+//                    if self.OpenAPIDataInfoDic != nil{
+//                        var radomIntArr = [arc4random_uniform(199),arc4random_uniform(199),arc4random_uniform(199)]
+//
+//                        for (key, value) in self.OpenAPIDataInfoDic!{
+//                            self.OpenAPIDataInfoArr.append(value as! [String : Any])
+//                        }
+//
+//                        print("OpneApi관련 데이터를 RTDB에서 앱으로 다 불러왔다!")
+//                        print("현재 OpenApiDataArr에  저장된 데이터 중 1번째 인덱스에 포함된 데이터  : \(self.OpenAPIDataInfoArr[1])")
+//
+//                        for data in 0...radomIntArr.count-1 {
+//                            self.OpenAPIDataInfoForRecomendArr.append(self.OpenAPIDataInfoArr[Int(radomIntArr[data])])
+//                            print("openApi로 가져올 데이터중 무작위 3개를 뽑고 그 3개중 \(data)번째 데이터는? \(self.OpenAPIDataInfoForRecomendArr[data])")
+//                        }
+//
+//                    }
+//                    else{
+//                        //note: 이 부분은  recomendSpotInfoDic에 아무 데이터도 들어오지 않았을 때 실행되는 로직
+//                        print("현재 OpneApiDataDic에 아무 정보도 없습니다.")
+//                    }
+//                }
+//
+//            }
+//        }
+//
+    func reloadOpenAPIData(){
+        var ref = Database.database().reference()
+
+
+        ref.child("OpenApiData/DATA/DATA").observe(DataEventType.value) { (snapshot) in
+
+            DispatchQueue.global().async {
+                // note : 내가 이부분에 이렇게 dispatchQueue를 사용해서 작업순서를 조정하려함
+
+//                self.OpenAPIDataInfoArr =  (snapshot.value as? Array<Dictionary<String, Any>>)!
+                self.OpenAPIDataInfoDic = snapshot.value as? Dictionary<String, Any>
+                self.OpenAPIDataInfoArr = self.OpenAPIDataInfoDic!["DATA"] as! Array<Dictionary<String, Any>>
+                
+                print("OADInfoDic의 저장된 데이터는? \(self.OpenAPIDataInfoDic)")
+                //                self.OpenAPIDataInfoArr =  (snapshot.value as? Array<Dictionary<String, Any>>)!
+
+
+
+                if self.OpenAPIDataInfoArr != nil{
+                    var radomIntArr = [arc4random_uniform(199),arc4random_uniform(199),arc4random_uniform(199)]
+                    print("OpneApi관련 데이터를 RTDB에서 앱으로 다 불러왔다!")
+                    print("현재 OpenApiDataArr에  저장된 데이터 중 1번째 인덱스에 포함된 데이터  : \(self.OpenAPIDataInfoArr[1])")
+                    for data in 0...radomIntArr.count-1 {
+                        self.OpenAPIDataInfoForRecomendArr.append(self.OpenAPIDataInfoArr[Int(radomIntArr[data])])
+                        print("openApi로 가져올 데이터중 무작위 3개를 뽑고 그 3개중 \(data)번째 데이터는? \(self.OpenAPIDataInfoForRecomendArr[data])")
+                    }
+                }
+                else{
+                    //note: 이 부분은  recomendSpotInfoDic에 아무 데이터도 들어오지 않았을 때 실행되는 로직
+                    print("현재 OpneApiDataDic에 아무 정보도 없습니다.")
+                }
+            }
+
+        }
+    }
+//
+
+    
+    func recomendSpotInfoByUser(_ autoID : String, _ select : @escaping () -> (Void)){
+        var ref = Database.database().reference()
+        ref.child("ios/recomendRouteInfo/\(autoID)").observeSingleEvent(of: .value) { (snapshot) in
+            print("recmendSpotInfoByUser 메소드에 의해 반환된 snapshot의 타입은? \(type(of: snapshot.value!))")
+            print("recmendSpotInfoByUser 메소드에 의해 반환된 snapshot의 저장된 데이터는? \( snapshot.value! as? Dictionary<String, Any> )")
+            DispatchQueue.global().sync {
+                self.recomendSpotMadeUserDic = snapshot.value! as? Dictionary<String, Any>
+            }
+            DispatchQueue.global().sync {
+                print("recomendSpotMadeUserDic에 저장된 데이터는? \(self.recomendSpotMadeUserDic)")
+                print("recomendSpotInfoByUser 메소드 실해!")
+                select()
+            }
+           
+        }
     }
     
     }

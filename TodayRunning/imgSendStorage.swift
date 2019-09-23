@@ -96,7 +96,7 @@ func sendImgStorageOnlyImg( img : UIImage){
             return
         }
         // You can also access to download URL after upload.
-        spaceRef.downloadURL { (url, error) in
+        spaceRef.downloadURL { (url, error) in // note: 이 부분에서 url을 가쟈오는거
             guard let downloadURL = url else {
                 // Uh-oh, an error occurred!
                 return
