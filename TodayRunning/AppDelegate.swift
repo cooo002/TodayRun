@@ -13,7 +13,6 @@ import GoogleSignIn
 import NMapsMap
 
 
-
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
 {
@@ -48,13 +47,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
             let user = Auth.auth().currentUser
             var gogleloginUid : String?
             if let user = user {
-                // The user's ID, unique to the Firebase project.
-                // Do NOT use this value to authenticate with your backend server,
-                // if you have one. Use getTokenWithCompletion:completion: instead.
+          
                 gogleloginUid = user.uid
-//                let email = user.email
-//                let photoURL = user.photoURL
-                // ...
+//
                 //               note: propertyList에 uid가 잘 저장되었는지 확인하는 체크용!!
                 print("현재 로그인한 유저는\(gogleloginUid)")
 //                print("저장된 uid\(self.userProperty.readString(key: "uid"))")
@@ -67,24 +62,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
         }
         print("델리게이트에 사인 메소드 실행")
         //refact: 이런 propertylist에 데이터 읽고 쓰는거 메소드를 따로 만들어서 관리하자!!
-
-        
-        
         let MainStoryboard = UIStoryboard(name: "Main", bundle: nil)
         // 뷰 컨트롤러 인스턴스
         let viewController = MainStoryboard.instantiateViewController(withIdentifier: "_ProfileInit2")
-        
+        //note: _profileInit2 는 회원가입 후. 실행되는 회원가입 VC 이다.
         // 윈도우의 루트 뷰 컨트롤러 설정
         self.window?.rootViewController = viewController
-        
-        
         // 이제 화면에 보여주자.
         self.window?.makeKeyAndVisible()
-        
-        
-        
     }
     
+   
     //note: 구글 로그인을 메소드
     func sign(_ signIn: GIDSignIn!, didDisconnectWith user: GIDGoogleUser!, withError error: Error!) {
         // Perform any operations when the user disconnects from app here.
@@ -130,16 +118,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
         }
         // 이제 화면에 보여주자.
         self.window?.makeKeyAndVisible()
-        
-        //       refact: 앱 내 모든 네비게이션 바의 색상 변경
-        //        UINavigationBar.appearance().barTintColor = UIColor(red: 119, green: 119, blue: 119, alpha: 1)
-        //        UINavigationBar.appearance().barTintColor = .gray
-        //       refact: 앱 내 모든 탭 바의 색상 변경
-        //        UITabBar.appearance().barTintColor = .gray
-        //        UITabBar.appearance().barTintColor = UIColor.blue
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        self.window = UIWindow(frame: UIScreen.main.bounds)//note: 처음에 시작되는 stroryBoar를 정해주지 않는다면 이렇게 window 객체를 실제로 만들어서 사용해야한다.
         
         
         FirebaseApp.configure()
@@ -158,11 +141,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
 
         // window가 없으니 만들어준다.
         
-//        self.userProperty.writeBool(bool: true, key: "signUP")// note: 강제적으로 second story를 실행하도록 해주는 코드
+//        self.userProperty.writeBool(bool: false, key: "signUP")// note: 강제적으로 second story를 실행하도록 해주는 코드
         var checkingStory = self.userProperty.readBool(key: "signUP")
-        self.window = UIWindow(frame: UIScreen.main.bounds)
+        
        
         
+    
         
         
         // check!: 구글 로그인 버튼을 누르면 분명 sign은 true로 바뀌어야하는데 왜 안 바껴...(프로퍼티 리스트 구조체를 만들어서 다뤄보자)
@@ -170,9 +154,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
 //        self.plist.synchronize()
         //note : 도대체 왜 메인 스토리 보드로 넘어가고 나서야 noticeInfoReload이 실행되는가??
         DispatchQueue.global().sync {
-            self.ReloadRTDB.noticeInfoReload(nil){
-                var signUp =  self.userProperty.readBool(key: "signUp")
-                if signUp {
+            self.ReloadRTDB.initNoticeInfoReload(nil){
+//                 self.userProperty.writeBool(bool: false, key: "signUP")// note: 강제적으로 second story를 실행하도록 해주는 코드
+//           /     var signUp =  self.userProperty.readBool(key: "signUp")
+                if checkingStory {
                     
                     let secondStoryboard = UIStoryboard(name: "Second", bundle: nil)
                     // 뷰 컨트롤러 인스턴스
@@ -198,21 +183,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
                 self.window?.makeKeyAndVisible()
             }
               
-        
+        // note: 추천 스팟에 대한 정보를 불러오는 메소드이다
             self.ReloadRTDB.recommendSpotReload(){
                 print("추천스팟에 대한 데이터를 RTDB에서 전부 불러왔다")
             }
-
-                
-            
+                //note : 공공 데이터 포털에서 받아온 데이터를 저장한 RTDB에서 데이터를 불러오는 로직이다.
             self.ReloadRTDB.reloadOpenAPIData()
             
         }
-        
-     
-//
 //        self.selectVC(checkingStory)
-     
         return true
     }
 

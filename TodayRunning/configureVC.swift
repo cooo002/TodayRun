@@ -133,12 +133,15 @@ class configureVC: UITableViewController, UINavigationControllerDelegate, UIImag
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
+        var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var img = info[UIImagePickerController.InfoKey.editedImage] as! UIImage
         self.sendImgStorageOnlyImg(img: img)// note 9/6일 imgSendStorage 클래스를 이용해서 img를 갱신하는 방법!! 일단 이 부붑부터 시작하자!!
         self.profileImg.image = img
         
-        picker.dismiss(animated: true)
-        
+        picker.dismiss(animated: true){
+            // note : 피커가 종료된 후에 실행되는 부분
+          print("dismiss 실행")
+        }
     }
 
     

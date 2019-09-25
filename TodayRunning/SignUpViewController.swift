@@ -24,6 +24,8 @@ class SignUpViewController: UIViewController {
             
             Auth.auth().createUser(withEmail: email, password: pass) { authResult, error in
                 // ...
+//
+//                let newUser = authResult?.user.
                 let user = Auth.auth().currentUser
                 var emailloginUid : String?
                 if let user = user {
@@ -34,8 +36,9 @@ class SignUpViewController: UIViewController {
                     //               note: propertyList에 uid가 잘 저장되었는지 확인하는 체크용!!
                     print("현재 로그인한 유저는\(emailloginUid)")
                     //                print("저장된 uid\(self.userProperty.readString(key: "uid"))")
-                    self.appDelegate.userProperty.writeBool(bool: true, key: "signUp")
+                    self.appDelegate.userProperty.writeBool(bool: true, key: "signUP")
                     self.appDelegate.userProperty.writeString(string: emailloginUid!, key: "uid")
+                    print("email로 회원가입한 유저의 uid와 현재 회원가입 상태는?: \(self.appDelegate.userProperty.readBool(key: "signUP")),\( self.appDelegate.userProperty.readString(key: "uid"))")
                 }
             }
         }

@@ -16,9 +16,17 @@ import GoogleSignIn
 
 
 
+
 class signViewController:UIViewController, GIDSignInUIDelegate{
 
     
+//    @IBAction func moveCellySignInView(_ sender: Any) {
+//        var celyStoryBoard = UIStoryboard(name: "Cely", bundle: nil)
+//        var celyviewController = celyStoryBoard.instantiateViewController(withIdentifier: "celyStoryBoard")
+//        self.present(celyviewController, animated: true, completion: nil)
+//        
+//    }
+//    
         override func viewDidLoad() {
         super.viewDidLoad()
          GIDSignIn.sharedInstance().uiDelegate = self

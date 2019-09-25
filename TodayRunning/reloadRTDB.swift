@@ -33,14 +33,14 @@ class reloadRTDB: UIViewController {
     var recomendSpotMadeUserDic : Dictionary<String, Any>?
     
     
-    func noticeInfoReload( _ log : (() -> Void)?, _ completion : @escaping () -> (Void) ){
+    func initNoticeInfoReload( _ log : (() -> Void)?, _ completion : @escaping () -> (Void) ){
         var ref = Database.database().reference()
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var signUp = appDelegate.userProperty.readBool(key: "signUP")
 //        var signUp = false
-       
-        
-        ref.child("ios/runnigNoticeBoard").observe(DataEventType.value, with:{(snapshot) in//note:  한번 리스너가 연결되어 호출되면 이후 해당 경로를 포함한 하위 데이터의 변경일 있을 때만다 이 리스너가 호출된다.
+        ref.child("ios/runnigNoticeBoard").observeSingleEvent(of: .value) { (snapshot) in
+            
+        //note:  한번 리스너가 연결되어 호출되면 이후 해당 경로를 포함한 하위 데이터의 변경일 있을 때만다 이 리스너가 호출된다.
             
             // note: 확인 해보니 인자로 전달 받은 클로져가 해당 함수가 종료되고 바로 실행되는게 아닌것 같아.다른 메소드를 실행하고 그 다음에 클로져의 정의된 내용을 실행하게된다. (이유를 알자!
             
@@ -63,17 +63,56 @@ class reloadRTDB: UIViewController {
                     }
                     completion()
                     }
-//                DispatchQueue.global().sync {
-//                 appDelegate.selectVC(signUp)
-//                }
             }
              else{
                 print("reloadRTDB에서 noticeInfoReload메소드 실행!!")
-//                appDelegate.selectVC(signUp)
                 completion()
             }
-        })
-    }
+        }
+            
+    } // note : observer 의 끝!!!!
+    
+    
+    
+    
+      func noticeInfoReload( _ log : (() -> Void)?, _ completion : @escaping () -> (Void) ){
+            var ref = Database.database().reference()
+            var appDelegate = UIApplication.shared.delegate as! AppDelegate
+            var signUp = appDelegate.userProperty.readBool(key: "signUP")
+    //        var signUp = false
+        ref.child("ios/runnigNoticeBoard").observeSingleEvent(of: DataEventType.value) { (snapshot) in
+            
+        //note:  한번 리스너가 연결되어 호출되면 이후 해당 경로를 포함한 하위 데이터의 변경일 있을 때만다 이 리스너가 호출된다.
+                
+                // note: 확인 해보니 인자로 전달 받은 클로져가 해당 함수가 종료되고 바로 실행되는게 아닌것 같아.다른 메소드를 실행하고 그 다음에 클로져의 정의된 내용을 실행하게된다. (이유를 알자!
+                
+                self.notictlist?.removeAll()
+                self.titleArr.removeAll()
+                self.infoArr.removeAll()
+                
+
+                self.notictlist = snapshot.value as? Dictionary<String, Any>
+                //            note:infoArr에 numOfPerson 이 nil이 아닐 경우 메인 뷰가 켜질수 있도록 해준다
+                 if self.notictlist != nil{
+                    DispatchQueue.global().sync { // note: 데이터 파싱을 우선적으로 할 수 있게 큐로 해준다
+                        for (key, value) in self.notictlist!{
+                            self.titleArr.append(key)
+                            self.infoArr.append(value as! [String : Any])
+                            print("value의 저장되는 값은?\(value as! Dictionary<String, Any>)")
+                            print("value의 타입은? \(type(of: value))")
+                            print("Divtionnary 타입을 저장하도록하는 infArr의 저장돈 값은? : \(self.infoArr)")
+                            print("reloadRTDB에서 noticeInfoReload메소드 실행!!")
+                        }
+                        completion()
+                        }
+                }
+                 else{
+                    print("reloadRTDB에서 noticeInfoReload메소드 실행!!")
+                    completion()
+                }
+            }
+                }// note : observer 의 끝!!!!
+        
     
     
     func serchingUserInfo(_ uid : String, _ select : @escaping () -> (Void)){  //note: 파라미터로 넘어온 uid에 해당하는 유저의 img url을 넘겨주는 메소드
