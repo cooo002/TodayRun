@@ -27,7 +27,20 @@ class TargetLocationMapVC: UIViewController, NMFMapViewDelegate {
     
 //    var DEFAULT_CAMERA_POSITION : NMFCameraPosition?
     
-  
+    @IBAction func backAction(_ sender: Any) {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func doneAction(_ sender: Any) {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+              appDelegate.boardInfo.location = self.centerLocation
+              appDelegate.ReloadRTDB.noticeInfoReload(nil) {
+                  
+                  self.navigationController?.popViewController(animated: true)
+                  
+              }
+        
+    }
     @IBOutlet weak var areaName: UITextField!
     
     @IBOutlet weak var mapView: UIView! // 네이버 맵 뷰가 띄어지는 뷰
@@ -37,11 +50,11 @@ class TargetLocationMapVC: UIViewController, NMFMapViewDelegate {
     @IBAction func selectViewAction(_ sender: Any) {
         switch viewSelectSegment.selectedSegmentIndex {
             
+//        case 0:
+//            self.addExplanationView(uiImg: self.img!)
         case 0:
-            self.addExplanationView(uiImg: self.img!)
-        case 1:
             self.addMapView(lat: self.defaultLat, lng: self.defaultLng)
-        case 2:
+        case 1:
             self.addMapView(lat: self.defaultLat, lng: self.defaultLng)
         default:
             print("세그먼트 컨트롤러를 탭하였다!")
@@ -220,14 +233,9 @@ class TargetLocationMapVC: UIViewController, NMFMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.img = UIImage(named:"profile-bg")
-        let imgView = UIImageView()
-        imgView.frame.size = CGSize(width: self.mapView.frame.height, height: self.mapView.frame.width)
-        imgView.center = CGPoint(x: self.mapView.frame.width/2, y: self.mapView.frame.height/2)
-        imgView.image = self.img
-        self.mapView.addSubview(imgView)
+       self.addMapView(lat: self.defaultLat, lng: self.defaultLng)
         
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "완료", style: .plain, target: self, action: #selector(self.areaMarkerTask(_:)))
+       // self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "완료", style: .plain, target: self, action: #selector(self.areaMarkerTask(_:)))
         
         
         

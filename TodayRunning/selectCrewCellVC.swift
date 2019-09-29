@@ -15,6 +15,9 @@ import SDWebImage
 
 class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSource, NMFMapViewDelegate{
     
+    @IBAction func backAction(_ sender: Any) {
+        self.navigationController?.popViewController(animated: true)
+    }
     @IBOutlet weak var notice: UITextView!
     
     @IBOutlet weak var map: UIView!
@@ -87,6 +90,7 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.navigationBar.isHidden = false
         var departureMarker = NMFMarker()
         var destinationMarker = NMFMarker()
         

@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import FCAlertView
 
 //note: 프로필 사진을 클릭하였을 때 이미지 피커 컨트롤러가 실행되도록 하기위해 프로토콜을 추가함
 //extension ProfileInitViewController : UINavigationControllerDelegate, UIImagePickerControllerDelegate{
@@ -16,7 +17,7 @@ import UIKit
 
 class ProfileInitTableViewController: UITableViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate{
     
-    
+    var window: UIWindow?
     let profileImage = UIImageView()
     var imgsendStorage : imgSendStorage? //note: 이미지를 스토리지에 전송하는 클래스
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -30,26 +31,63 @@ class ProfileInitTableViewController: UITableViewController, UINavigationControl
     @IBOutlet weak var gender: UISegmentedControl!
     
 
-    
+    func emptyAlert(){
+        
+        var alert = FCAlertView()
+                
+        //        alert.delegate = self
+                alert.makeAlertTypeWarning()
+                alert.colorScheme = .gray
+                alert.firstButtonTitleColor = .white
+                alert.firstButtonBackgroundColor = .gray
+                
+                alert.addButton("확인") {
+                    print("빈칸 체크 용  경고창이 나오고 확인 버튼 클릭")
+                   
+                }
+        
+                alert.hideDoneButton = true
+
+                alert.showAlert(inView: self,
+                                withTitle: nil,
+                                withSubtitle: "빈칸을 전부 채워주세요!!",
+                                withCustomImage: nil,
+                                withDoneButtonTitle: nil,
+                                andButtons: nil)
+
+        
+    }
     @objc func sendData(_ send : Any){
         
- 
-        
-        //       note: fireBase에 데이터를 보내는 로직을 작성하자
-         self.appDelegate.userProperty.writeBool(bool: true, key: "signUp")
+        self.window = UIWindow(frame: UIScreen.main.bounds)
         var secondStory = UIStoryboard(name: "Second", bundle: nil)
-        var viewController = secondStory.instantiateViewController(withIdentifier: "secondStoryBoard")
+        var mainViewController = secondStory.instantiateViewController(withIdentifier: "secondStoryBoard")
+        //       note: fireBase에 데이터를 보내는 로직을 작성하자
+        if (self.text.text != ""), (self.profileImage.image != nil){
+            DispatchQueue.global().sync {
+            
+        
+                self.appDelegate.userProperty.writeBool(bool: true, key: "signUp")
+      
         
         
-        var name = self.text.text as String?
-        var birth = self.date.text as String?
-        var gender = self.genderReturn(gender: self.gender.selectedSegmentIndex )//note: 이 부분에서 함수 하나 만들어서 조건문 따라 설명을 반환해주게  return 으로 반환해주자!!!
-        var img = self.profileImage.image!
+                var name = self.text.text as String?
+                var birth = self.date.text as String?
+                var gender = self.genderReturn(gender: self.gender.selectedSegmentIndex )//note: 이 부분에서 함수 하나 만들어서 조건문 따라 설명을 반환해주게  return 으로 반환해주자!!!
+                var img = self.profileImage.image!
         
-        imgsendStorage = imgSendStorage(name: name!, gender: gender, birth: birth!)
-        imgsendStorage!.sendImgStorage(img: img)
+                imgsendStorage = imgSendStorage(name: name!, gender: gender, birth: birth!)
+                imgsendStorage!.sendImgStorage(img: img)
+            }
         
-        self.present(viewController, animated: true)
+            self.window?.rootViewController = mainViewController
+            self.window?.makeKeyAndVisible()
+        }
+        else{
+            //note: 프로필 작성 시 공란이 있을 경우 실행되는 로직
+            self.emptyAlert()
+            
+        }
         
     }
     
@@ -162,6 +200,7 @@ class ProfileInitTableViewController: UITableViewController, UINavigationControl
     
     override func viewDidLoad() {
         super.viewDidLoad()
+            self.navigationController?.isNavigationBarHidden = false // note: 네비게이션 바를 감추는 것이다.
         self.navigationItem.title = "프로필"
         let sendDataBtn = UIBarButtonItem(title: "완료", style: .plain, target: self, action: #selector(sendData(_:)))
         self.navigationItem.rightBarButtonItem = sendDataBtn

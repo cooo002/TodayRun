@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Firebase
+import FCAlertView
 
 class RunningBoardMadeVC:  UITableViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     
@@ -32,7 +33,39 @@ class RunningBoardMadeVC:  UITableViewController, UINavigationControllerDelegate
 //    var attempPersonArr : Array<String>? = []
     
     // note: 제목과 공지사항을 그냥 바로 넘긴다.
-
+    @IBAction func backAction(_ sender: Any) {
+        self.navigationController?.popViewController(animated: true)
+        
+        
+    }
+    
+    @IBAction func doneAction(_ sender: Any) {
+                print("fireBase로 공지 data 보내기 선택")
+                     // note : 공란을 확인하기 위해 조건문 걸자!!!
+                         print("방 만들기에서 제목에 들어간 값은 \(self.boardTitle?.text)")
+                         
+                         if  ((self.notice?.text) != ""), ((self.numOfPeople?.text) != ""), self.boardTitle?.text != ""{
+                         self.boardInfoDataSend(){
+                 //            viewDismiss {
+                                 self.appDelegate.ReloadRTDB.initNoticeInfoReload(nil) { () -> (Void) in
+                 //                    var vc = self.navigationController?.topViewController
+                                     
+                                         self.navigationController?.popViewController(animated: true)
+                                     // 셀의 reload를 해주자!!
+                                 }
+                                        // note : 이번에 업데이트하고 나면서 뭔가 달라졌어... 밑에 popUP으로 하니까 맨 처음 화면으로 돌아간... 그래서 disMiss로 돌아가게 해줫다.
+                             
+                 //        self.navigationController?.popViewController(animated: true)
+                         }
+                         }
+                         else{
+                             
+                             self.emptyAlert()
+                         }
+                      
+    }
+    
+    
     @IBOutlet weak var notice: UITextView?
     @IBOutlet weak var boardTitle: UITextField? //note: 공지제목
     @IBOutlet weak var numOfPeople: UITextField?// note: 정원수
@@ -45,6 +78,36 @@ class RunningBoardMadeVC:  UITableViewController, UINavigationControllerDelegate
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
     }
+    
+    
+      func sendData(_ send :Any){
+            
+            
+            print("fireBase로 공지 data 보내기 선택")
+        // note : 공란을 확인하기 위해 조건문 걸자!!!
+            print("방 만들기에서 제목에 들어간 값은 \(self.boardTitle?.text)")
+            
+            if  ((self.notice?.text) != ""), ((self.numOfPeople?.text) != ""), self.boardTitle?.text != ""{
+            self.boardInfoDataSend(){
+    //            viewDismiss {
+                    self.appDelegate.ReloadRTDB.initNoticeInfoReload(nil) { () -> (Void) in
+    //                    var vc = self.navigationController?.topViewController
+                        
+                            self.navigationController?.popViewController(animated: true)
+                        // 셀의 reload를 해주자!!
+                    }
+                           // note : 이번에 업데이트하고 나면서 뭔가 달라졌어... 밑에 popUP으로 하니까 맨 처음 화면으로 돌아간... 그래서 disMiss로 돌아가게 해줫다.
+                
+    //        self.navigationController?.popViewController(animated: true)
+            }
+            }
+            else{
+                
+                self.emptyAlert()
+            }
+            
+        }
+        
     
     
     func boardInfoDataSend(_ completion : () -> (Void)){
@@ -88,47 +151,40 @@ class RunningBoardMadeVC:  UITableViewController, UINavigationControllerDelegate
         }
     }
     
-//    func viewDismiss(_ completion: () -> (Void)){
-//        print("viewDismiss 메소드 싫행됨!!")
-//        completion()
-//    }
+func emptyAlert(){
     
-    @objc func sendData(_ send :Any){
-        
-        
-        print("fireBase로 공지 data 보내기 선택")
-    // note : 공란을 확인하기 위해 조건문 걸자!!!
-        print("방 만들기에서 제목에 들어간 값은 \(self.boardTitle?.text)")
-        
-        if  ((self.notice?.text) != ""), ((self.numOfPeople?.text) != ""), self.boardTitle?.text != ""{
-        self.boardInfoDataSend(){
-//            viewDismiss {
-                self.appDelegate.ReloadRTDB.initNoticeInfoReload(nil) { () -> (Void) in
-                        self.navigationController?.popViewController(animated: true)
-                    // 셀의 reload를 해주자!!
-                }
-                       // note : 이번에 업데이트하고 나면서 뭔가 달라졌어... 밑에 popUP으로 하니까 맨 처음 화면으로 돌아간... 그래서 disMiss로 돌아가게 해줫다.
+    var alert = FCAlertView()
             
-//        self.navigationController?.popViewController(animated: true)
-        }
-        }
-        else{
-            let alert = UIAlertController(title: nil, message: "각 항목을 전부 채워주세요", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            
-            
-        }
-        
-    }
+    //        alert.delegate = self
+    alert.makeAlertTypeWarning()
+    alert.colorScheme = .gray
+    alert.firstButtonTitleColor = .white
+    alert.firstButtonBackgroundColor = .gray
+    alert.addButton("확인") {
+        print("빈칸 체크 용  경고창이 나오고 확인 버튼 클릭")
+            }
+    alert.hideDoneButton = true
+    alert.showAlert(inView: self,
+                            withTitle: nil,
+                            withSubtitle: "빈칸을 전부 채워주세요!!",
+                            withCustomImage: nil,
+                            withDoneButtonTitle: nil,
+                            andButtons: nil)
+
     
+}
+    
+  
     
     override func viewDidLoad() {
         super.viewDidLoad()
+         self.navigationController?.navigationBar.isHidden = false
 
         self.navigationItem.title = "런닝메이트 만들기"
-        let sendDataBtn = UIBarButtonItem(title: "완료", style: .plain, target: self, action: #selector(sendData(_:)))
-        self.navigationItem.rightBarButtonItem = sendDataBtn
+     
+//        sendDataBtn.image = UIImage(contentsOfFile: "")
+//        self.navigationItem.rightBarButtonItem = sendDataBtn
+//
 
 
     }
@@ -139,6 +195,7 @@ class RunningBoardMadeVC:  UITableViewController, UINavigationControllerDelegate
     
     
     override func viewWillAppear(_ animated: Bool) { //note: 화면이 보일 때 마다 boardInfo에 저장된 위도, 경도롤 갱신!!
+        self.navigationController?.navigationBar.isHidden = false
         self.departureLat = appDelegate.boardInfo.departureLat
         self.departureLng = appDelegate.boardInfo.departureLng
         self.destinationLat = appDelegate.boardInfo.destinationLat

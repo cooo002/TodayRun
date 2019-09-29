@@ -13,22 +13,45 @@ import Foundation
 import UIKit
 import Firebase
 import GoogleSignIn
+import LGButton
 
 
 
 
 class signViewController:UIViewController, GIDSignInUIDelegate{
-
     
-//    @IBAction func moveCellySignInView(_ sender: Any) {
-//        var celyStoryBoard = UIStoryboard(name: "Cely", bundle: nil)
-//        var celyviewController = celyStoryBoard.instantiateViewController(withIdentifier: "celyStoryBoard")
-//        self.present(celyviewController, animated: true, completion: nil)
-//        
-//    }
-//    
+    @IBOutlet weak var bgView: UIImageView!
+    
+    @IBOutlet weak var googleLoginButton: GIDSignInButton!
+    
+    
+    @IBAction func moveLogInView(_ sender: Any) {
+
+        var celyStoryBoard = UIStoryboard(name: "Cely", bundle: nil)
+                      var celyviewController = celyStoryBoard.instantiateViewController(withIdentifier: "logInStoryBoard")
+              self.navigationController?.show(celyviewController, sender: true)
+              
+        
+    }
+    
+   
+    @IBAction func moveSignUpView(_ sender: Any) {
+    
+    
+         var celyStoryBoard = UIStoryboard(name: "Cely", bundle: nil)
+                var celyviewController = celyStoryBoard.instantiateViewController(withIdentifier: "logInStoryBoard")
+        self.navigationController?.show(celyviewController, sender: true)
+        
+        
+    }
+
         override func viewDidLoad() {
         super.viewDidLoad()
+            self.googleLoginButton.layer.cornerRadius = self.googleLoginButton.bounds.width / 12
+            self.googleLoginButton.layer.borderWidth = 0
+            self.googleLoginButton.layer.masksToBounds = true
+
+            self.navigationController?.isNavigationBarHidden = true // note: 네비게이션 바를 감추는 것이다.
          GIDSignIn.sharedInstance().uiDelegate = self
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
 
@@ -37,11 +60,14 @@ class signViewController:UIViewController, GIDSignInUIDelegate{
         print("회원가입여부??",check)
         var currentUser = Auth.auth().currentUser?.email
             print("현재 로그인 되어있는 유저의 이메일은? : \(currentUser)")
-            
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.isNavigationBarHidden = true
         
         
         
         
     }
-    
 }

@@ -25,25 +25,29 @@ class configureVC: UITableViewController, UINavigationControllerDelegate, UIImag
     
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
+    var window : UIWindow?
     
     @IBAction func logOut(_ sender: Any) {
         //note: 로그아웃을 하는 로직
 //        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         
+        self.window = UIWindow(frame: UIScreen.main.bounds)
         let storyBoard = UIStoryboard(name: "Main", bundle: nil)
         let VC = storyBoard.instantiateViewController(withIdentifier: "mainStoryBoard")
+        self.window?.rootViewController = VC
+        
     
         let firebaseAuth = Auth.auth()//
         do {
             try firebaseAuth.signOut()
             self.appDelegate.userProperty.writeBool(bool: false, key: "signUp")
-            self.present(VC, animated: true) {
-            print("로그아웃 버트이 탭되고 present 메소드가 실행되었다. ")
+           
             }
-          
-        } catch let signOutError as NSError {
+    
+         catch let signOutError as NSError {
             print ("Error signing out: %@", signOutError)
         }
+         self.window?.makeKeyAndVisible()
     }
     
     
@@ -163,7 +167,7 @@ class configureVC: UITableViewController, UINavigationControllerDelegate, UIImag
         self.gender.text = appDelegate.userProperty.readString(key: "gender")
         
         print("프로필 변경 화면을 띄울때 프로퍼티에 저장된 이름의 값은? \(appDelegate.userProperty.readString(key: "name"))")
-        print("현재 로그인한 유저의 uid\(user?.uid)")
+        print("현재 로그인한 유저의 uid\(user?.uid)") // 프로필 수정하는 화면으로 들어가면 로그인한 유저의 uid 가 nil 이라고 찍히는데 이는 fireBase에서 로그인한 유저의 uid를 밥아오기 전에  해당 값을 로그로 출력해버려서 로그에 nil이 ㅣ찍히는 것이다.
         
     }
     

@@ -11,6 +11,8 @@ import UIKit
 import Firebase
 import SDWebImage
 import Floaty
+import XREasyRefresh
+
 class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate{
     
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -22,6 +24,7 @@ class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     var viewAppearCheckApiOrPeoplefrom : Bool? //note: true(셀을 클릭하여 세그실행), false(상단 배너에 위치한 이미지 뷰를 선택하어 세그가 실행)
     
  
+    @IBOutlet weak var justCheckingLabel: UILabel!
     
     @IBOutlet weak var verticalScrollView: UIScrollView!
     
@@ -34,10 +37,13 @@ class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     @IBOutlet weak var pageControl: UIPageControl!
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
         return 100
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+
+        
         return self.appDelegate.ReloadRTDB.recomendSpotInfoArr.count
     }
     
@@ -95,12 +101,23 @@ class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         super.viewDidLoad()
         self.recomandTableView.delegate = self
         self.recomandTableView.dataSource = self
-    
+      
         self.horizontalScrollView.delegate = self
         self.pageControl.numberOfPages = self.pageImgArr.count
         self.pageControl.currentPage = 0
         
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
+        
+        self.verticalScrollView.xr.addPullToRefreshHeader(refreshHeader: XRActivityRefreshHeader(), heightForHeader: 65, ignoreTopHeight: XRRefreshMarcos.xr_StatusBarHeight) {
+                            // do request...
+                   
+        //                  self.tableView.reloadData()
+                    self.recomandTableView.reloadData()
+                    
+                        self.verticalScrollView.xr.endHeaderRefreshing()
+                        }
+        
+
         
         for i in 0 ..< appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr.count{
             var imageView = UIImageView()
@@ -122,6 +139,7 @@ class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         }
 //        self.horizontalScrollView.bringSubviewToFront(pageControl)
                 self.pageView.bringSubviewToFront(pageControl)
+        
         
         let floaty = Floaty()
         floaty.addItem(title: "방 만들기", handler: { item in

@@ -32,6 +32,7 @@ class recomendCourseInfoVC: UIViewController, UINavigationBarDelegate,UIScrollVi
     var Marker = NMFMarker() //note: 이걸 이렇게 프로퍼티로 만든 이유를 생각하자( didTap 메소드 안에다 마커 객체를 만들어 놓으면 지도를 탭 할 때 마다 매번 새로운 마커가 만들어져서 지도에 탭한 만큼의 마커가 찍히게 된다 그래서 지도에 찍히는 마커의 갯수를 제한하기 위해서 이렇게 프로퍼티 빼고 탭을 할 때 마다 해당 마커의 mapView에 값이 nil인지 아닌지를 확인해 nil이면 기존 마커를 없애서 새로운 마커가 찍히게 해주는 것이다 .)
     
     var viewAppearCheckApiOrPeopleTo : Bool? //note: 상단 배너에 OpneAPI 정보를 받아와선 만들어짓 추천 스팟을 선택했느가 아니면 유저가 만든 추천스팟을 선택했는가를 확인하는 용도이다.
+    
     var pageControlCurrentPage : Int?
     
     
@@ -55,11 +56,13 @@ class recomendCourseInfoVC: UIViewController, UINavigationBarDelegate,UIScrollVi
             self.recomendSpotExplanation.isEditable = false
             self.navigationItem.title = "추천스팟 정보"
             self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(backButtonPress(_:)))
-                   
-            self.recomendSpotTitle.text = appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["course_name"] as! String
         
-            self.recomendSpotInfo.text = appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["detail_course"] as! String
-            self.recomendSpotExplanation.text = appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["content"] as! String
+        self.recomendImg.sd_setImage(with: URL(string: appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["p_img"] as! String), completed: nil)
+                   
+            self.recomendSpotTitle.text = appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["p_park"] as! String
+        
+            self.recomendSpotInfo.text = appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["p_addr"] as! String
+            self.recomendSpotExplanation.text = appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["p_list_content"] as! String
         
     }
     //  check: 공공 데이터 포털에서 받아온 좌표에 대한 문제점을 해결하자!!! 도대체 어디서 잘못된걸까???
@@ -67,18 +70,20 @@ class recomendCourseInfoVC: UIViewController, UINavigationBarDelegate,UIScrollVi
         
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         
-        var lat = (appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["x"] as! NSString).doubleValue//note: 공공 데이터 포털에서 받아온 x좌표를 해당 변수에 저장
+        var lng = (appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["longitude"] as! NSString).doubleValue//note: 공공 데이터 포털에서 받아온 x좌표를 해당 변수에 저장
         
-        var lng = (appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["y"] as! NSString).doubleValue// note: 공공 데이터 포털에서 받아온 y좌표를 저장
+        var lat = (appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[self.pageControlCurrentPage!]["latitude"] as! NSString).doubleValue // note: 공공 데이터 포털에서 받아온 y좌표를 저장
         
-        var tm = NMGTm128(x: lat, y: lng)// x, y 좌표를 utm_k 좌표계로 변환
-        var latlng = tm.toLatLng() // utm_k 좌표계를 네이버 지도에서 사용할 수 있는 좌표계롤 변환
-//        var utm = NMGUtmk(x: 968108.8334, y: 1851932.5428 )// x, y 좌표를 utm_k 좌표계로 변환
+//        var tm = NMGTm128(x: lng, y: lat)// x, y 좌표를 utm_k 좌표계로 변환
+//        var latlng = tm.toLatLng() // utm_k 좌표계를 네이버 지도에서 사용할 수 있는 좌표계롤 변환
+//        var utm = NMGUtmk(x: 969828.309 , y:  1944736.4575  )// x, y 좌표를 utm_k 좌표계로 변환
 //               var latlng = utm.toLatLng() // utm_k 좌표계를 네이버 지도에서 사용할 수 있는 좌표계롤 변환
 
 //        var utm = NMGUtmk(x: lat, y: lng )// x, y 좌표를 utm_k 좌표계로 변환
 //        var latlng = utm.toLatLng() // utm_k 좌표계를 네이버 지도에서 사용할 수 있는 좌표계롤 변환
-
+//백 이시만
+                
+    var latlng = NMGLatLng(lat: lat, lng: lng)
         
         self.NaverMapView = NMFNaverMapView(frame: CGRect(x: 0, y: 0, width: self.recomendSpotMapView.frame.width, height: self.recomendSpotMapView.frame.height))
         self.NaverMapView!.delegate = self
@@ -86,10 +91,10 @@ class recomendCourseInfoVC: UIViewController, UINavigationBarDelegate,UIScrollVi
 //        var DEFAULT_CAMERA_POSITION = NMFCameraPosition(NMGLatLng(lat: 23.764851101352427 , lng: 119.67097857829495  ), zoom: 14, tilt: 0, heading: 0)
         self.NaverMapView!.mapView.moveCamera(NMFCameraUpdate(position: DEFAULT_CAMERA_POSITION))
         self.recomendSpotMapView.addSubview(self.NaverMapView!)
-        print("공공데이터 포텅에서 가져온 x 값:\(lat), y 값: \(lng)")
+        print("공공데이터 포텅에서 가져온 x 값:\(lng), y 값: \(lat)")
         
         
-        print("공공데이터 포텅에서 가져온 x 값:\(latlng.lat), y 값: \(latlng.lng)")
+        print("공공데이터 포텅에서 가져온 x 값:\(latlng.lng), y 값: \(latlng.lat)")
                
         
         

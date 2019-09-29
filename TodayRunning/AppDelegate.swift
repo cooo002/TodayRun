@@ -11,6 +11,7 @@ import CoreData
 import Firebase
 import GoogleSignIn
 import NMapsMap
+import XREasyRefresh
 
 
 @UIApplicationMain
@@ -26,8 +27,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
     //note: 구글 로그인을 위한 delegate 메소드
     
     
+    
     func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error?) {
         // ...
+        var appDelegate = UIApplication.shared.delegate as! AppDelegate
+    
         if let error = error {
             // ...
             return
@@ -46,30 +50,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
             //           note: 현재 로그인 한 유저의 정보를 읽어오는 부분
             let user = Auth.auth().currentUser
             var gogleloginUid : String?
-            if let user = user {
-          
-                gogleloginUid = user.uid
+                if let user = user {
+                
+                    gogleloginUid = user.uid
+                
+                    appDelegate.ReloadRTDB.researchingOfSignIn(gogleloginUid!){
+                        self.userProperty.writeBool(bool: true, key: "signUp")
+                        self.userProperty.writeString(string: gogleloginUid!, key: "uid")
+                        print("해당 구글 이메일로 회원 가입을 한 적이이 있는지 체크하는 메소드 호출하여 실해됨")
+                }
 //
                 //               note: propertyList에 uid가 잘 저장되었는지 확인하는 체크용!!
-                print("현재 로그인한 유저는\(gogleloginUid)")
+                    print("현재 로그인한 유저는\(gogleloginUid)")
 //                print("저장된 uid\(self.userProperty.readString(key: "uid"))")
-            }
+                }
             
-        self.userProperty.writeBool(bool: true, key: "signUp")
-        self.userProperty.writeString(string: gogleloginUid!, key: "uid")
-            
-            
+        
+        
         }
-        print("델리게이트에 사인 메소드 실행")
-        //refact: 이런 propertylist에 데이터 읽고 쓰는거 메소드를 따로 만들어서 관리하자!!
-        let MainStoryboard = UIStoryboard(name: "Main", bundle: nil)
-        // 뷰 컨트롤러 인스턴스
-        let viewController = MainStoryboard.instantiateViewController(withIdentifier: "_ProfileInit2")
-        //note: _profileInit2 는 회원가입 후. 실행되는 회원가입 VC 이다.
-        // 윈도우의 루트 뷰 컨트롤러 설정
-        self.window?.rootViewController = viewController
-        // 이제 화면에 보여주자.
-        self.window?.makeKeyAndVisible()
+     
     }
     
    
@@ -123,7 +122,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         self.window = UIWindow(frame: UIScreen.main.bounds)//note: 처음에 시작되는 stroryBoar를 정해주지 않는다면 이렇게 window 객체를 실제로 만들어서 사용해야한다.
-        
+        XRRefreshControlSettings.sharedSetting.configSettings(
+                  animateTimeForAdjustContentInSetTop: 0.5,
+                  animateTimeForEndRefreshContentInSetTop: 0.5,
+                  afterDelayTimeForEndInsetTopRefreshing: 0.5,
+                  pullLoadingMoreMode: .needPullRelease,
+                  refreshStatusLblTextColor: XRRefreshControlSettings.colorFromRGB(hexRGB: 0x333333),
+                  refreshStatusLblTextFont: UIFont.systemFont(ofSize: 13))
+              
         
         FirebaseApp.configure()
         //note: 구글 로그인을 위한 설정!!

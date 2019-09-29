@@ -19,7 +19,9 @@ class reloadRTDB: UIViewController {
     //note: RTDB에서 유저 정보를 가져와서 그것을 저장하는 di,arr 이다.
     var attempPersonNumArr : Array<String> = [] // note: 타이틀을 저장하는 배열
     var userInfoDic : Dictionary<String, String>?
-
+    var userInfoCheckDic : Dictionary<String, String>?
+    
+    
     //note : RTDBD에서 추천스팟에 대한 정보를 가져와서 그것을 저장하는 dic, arr 이다.
     var recomendSpotInfoDic : Dictionary<String, Any>?
     var recomendSpotInfoArr : Array<Dictionary<String, Any>> = []
@@ -32,6 +34,45 @@ class reloadRTDB: UIViewController {
     //note: RTDB에서 검색한 특정 추천스팟에 대한 정보
     var recomendSpotMadeUserDic : Dictionary<String, Any>?
     
+    var window : UIWindow?
+    
+    func researchingOfSignIn(_ uid : String, _ completion : () -> (Void)){
+        // note : 로그아웃한 다음 구글로 다실 로그인 할 때 해당 아이디로 가입한 적이이 있는지 없는지를 확인하기위한 메소드
+        var ref = Database.database().reference()
+        var userInfoCheckDic : Dictionary<String, String>?
+        var signInCheck : Bool?
+        
+                
+                ref.child("ios/userInfo/\(uid)").observeSingleEvent(of: .value) { (snapshot) in
+                    
+                    self.window = UIWindow(frame: UIScreen.main.bounds)
+                    userInfoCheckDic = snapshot.value as? Dictionary<String, String>
+                    
+                    if snapshot.value != nil{
+                        //note :  이미 해당 아이디로 가입한 적이 있었다.
+                        let secondStoryboard = UIStoryboard(name: "Second", bundle: nil)
+                                           // 뷰 컨트롤러 인스턴스
+                        let viewController = secondStoryboard.instantiateViewController(withIdentifier: "secondStoryBoard")
+                                           
+                                           // 윈도우의 루트 뷰 컨트롤러 설정
+                        self.window?.rootViewController = viewController
+                        
+                        self.window?.makeKeyAndVisible()
+                        
+                    }
+                    else{
+                        
+                         let mainStoryBoard = UIStoryboard(name: "Main", bundle: nil)
+                                         let mainViewController = mainStoryBoard.instantiateViewController(withIdentifier: "_ProfileInit2")
+                                         self.present(mainViewController, animated: true)
+                        
+                    }
+        //            print("userInfoLocalDic에 저장된 데이터는? \(userInfoLocalDic)")
+                    //note: 내가 파라미터로 받아온 uid에 따라서 해당 유저의 정보는 잘들어온다
+                   
+                }
+   
+    }
     
     func initNoticeInfoReload( _ log : (() -> Void)?, _ completion : @escaping () -> (Void) ){
         var ref = Database.database().reference()
@@ -115,6 +156,20 @@ class reloadRTDB: UIViewController {
         
     
     
+    func serchingUserInfoAfterLogIn(_ uid : String, _ select : @escaping () -> (Void)){
+        
+        
+        
+        self.serchingUserInfo(uid) { () -> (Void) in
+            var appDelegate = UIApplication.shared.delegate as! AppDelegate
+            appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["profileImg"]!, key:"img" )
+            appDelegate.userProperty.writeString(string:  appDelegate.ReloadRTDB.userInfoDic!["name"]!, key:"name")
+            appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["birth"]!, key: "birth")
+            appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["gender"]!, key: "gender" )
+            select()
+        }
+    }
+    
     func serchingUserInfo(_ uid : String, _ select : @escaping () -> (Void)){  //note: 파라미터로 넘어온 uid에 해당하는 유저의 img url을 넘겨주는 메소드
         var ref = Database.database().reference()
         var userInfoLocalDic : Dictionary<String, String>?
@@ -130,9 +185,6 @@ class reloadRTDB: UIViewController {
             print("serchingUserInfo 메소드 실해!")
             select()
         }
-    
-//           print("일단 searchingUserInfo메소드에서 userInfoDic에 데이터가 들어감")
-        
     
         }
     
@@ -160,8 +212,12 @@ class reloadRTDB: UIViewController {
     //note: 추천스팟에 대한 데이터를 RTDB에서 불러오는 것
     func recommendSpotReload(_ completion: @escaping () -> (Void)){
         var ref = Database.database().reference()
-        ref.child("ios/recomendRouteInfo").observe(DataEventType.value, with: { (snapshot) in
+        
+        ref.child("ios/recomendRouteInfo").observeSingleEvent(of: DataEventType.value, with: { (snapshot) in
             //note: 값이 변경될 때 마다 실행된다.
+            self.recomendSpotInfoArr.removeAll()
+            self.recomendSpotInfoDic?.removeAll()
+            
             self.recomendSpotInfoDic = snapshot.value as? Dictionary<String, Any>
             
             if self.recomendSpotInfoDic != nil{
@@ -186,66 +242,64 @@ class reloadRTDB: UIViewController {
         
     }
     
+    //note: 추천스팟에 대한 데이터를 RTDB에서 불러오는 것
+       func initRecommendSpotReload(_ completion: @escaping () -> (Void)){
+           var ref = Database.database().reference()
+           
+           ref.child("ios/recomendRouteInfo").observe(DataEventType.value, with: { (snapshot) in
+               //note: 값이 변경될 때 마다 실행된다.
+               
+               
+               self.recomendSpotInfoDic = snapshot.value as? Dictionary<String, Any>
+               
+               if self.recomendSpotInfoDic != nil{
+                   for (key, value) in self.recomendSpotInfoDic!{
+                       self.recomendSpotInfoArr.append(value as! [String : Any])
+                   }
+                   print("현재 recomendSpotArr에 저장된 데이터는 : \(self.recomendSpotInfoArr)")
+                   print("recomendSpotArr에서 첫번째 인덱스에 저장된 스파에대한 설명은 \(self.recomendSpotInfoArr[0]["title"])")
+                   completion() // note: AppDelegate에서 클로져 전달인수로 그냥 데이터 불러왔다는 로그를 찍어주는 로직을 전송해주고 이를 여기서 실행한다. 그러면 화면에 데이터를 다 불러왔다고 log가 찍힐 것이다 .
+                   
+               }
+               else{
+                   //note: 이 부분은  recomendSpotInfoDic에 아무 데이터도 들어오지 않았을 때 실행되는 로직
+                   print("현재 recomendSpotDic에 아무 정보도 없습니다.")
+               }
+               
+               //note: 이 부분은 그냥 파싱한 데이터를 확인하는 용도이다.
+               print("recomendRouteInfo: \(self.recomendSpotInfoDic)")
+               print("recomendRouteInfo의 타입: \(type(of: self.recomendSpotInfoDic))")
+               
+           })
+           
+       }
+       
     
-//     func reloadOpenAPIData(){
-//            var ref = Database.database().reference()
 //
-//
-//            ref.child("OpenApiData/DATA/DATA").observe(DataEventType.value) { (snapshot) in
-//
-//                DispatchQueue.global().async {
-//                    // note : 내가 이부분에 이렇게 dispatchQueue를 사용해서 작업순서를 조정하려함
-//
-//    //                self.OpenAPIDataInfoArr =  (snapshot.value as? Array<Dictionary<String, Any>>)!
-//                    self.OpenAPIDataInfoDic =  snapshot.value as? Dictionary<String, Any>
-//
-//
-//
-//                    if self.OpenAPIDataInfoDic != nil{
-//                        var radomIntArr = [arc4random_uniform(199),arc4random_uniform(199),arc4random_uniform(199)]
-//
-//                        for (key, value) in self.OpenAPIDataInfoDic!{
-//                            self.OpenAPIDataInfoArr.append(value as! [String : Any])
-//                        }
-//
-//                        print("OpneApi관련 데이터를 RTDB에서 앱으로 다 불러왔다!")
-//                        print("현재 OpenApiDataArr에  저장된 데이터 중 1번째 인덱스에 포함된 데이터  : \(self.OpenAPIDataInfoArr[1])")
-//
-//                        for data in 0...radomIntArr.count-1 {
-//                            self.OpenAPIDataInfoForRecomendArr.append(self.OpenAPIDataInfoArr[Int(radomIntArr[data])])
-//                            print("openApi로 가져올 데이터중 무작위 3개를 뽑고 그 3개중 \(data)번째 데이터는? \(self.OpenAPIDataInfoForRecomendArr[data])")
-//                        }
-//
-//                    }
-//                    else{
-//                        //note: 이 부분은  recomendSpotInfoDic에 아무 데이터도 들어오지 않았을 때 실행되는 로직
-//                        print("현재 OpneApiDataDic에 아무 정보도 없습니다.")
-//                    }
-//                }
-//
-//            }
-//        }
-//
-    func reloadOpenAPIData(){
+    func reloadOpenAPIData(){ //note: 앱이 시작되면 일단 이 메소드 호출해서 db에 있는 데이터를 한번 쫙 받아온다.
+        
         var ref = Database.database().reference()
 
 
         ref.child("OpenApiData/DATA/DATA").observe(DataEventType.value) { (snapshot) in
+            //note : 원래 이전에는 data/data 가 경로였다
 
             DispatchQueue.global().async {
                 // note : 내가 이부분에 이렇게 dispatchQueue를 사용해서 작업순서를 조정하려함
 
 //                self.OpenAPIDataInfoArr =  (snapshot.value as? Array<Dictionary<String, Any>>)!
+                print("snapshot.value에 저장된 값은?? \(snapshot.value)")
                 self.OpenAPIDataInfoDic = snapshot.value as? Dictionary<String, Any>
+             print("OADInfoDic의 저장된 데이터는? \(self.OpenAPIDataInfoDic)")
                 self.OpenAPIDataInfoArr = self.OpenAPIDataInfoDic!["DATA"] as! Array<Dictionary<String, Any>>
                 
-                print("OADInfoDic의 저장된 데이터는? \(self.OpenAPIDataInfoDic)")
+//                print("OADInfoDic의 저장된 데이터는? \(self.OpenAPIDataInfoDic)")
                 //                self.OpenAPIDataInfoArr =  (snapshot.value as? Array<Dictionary<String, Any>>)!
 
 
 
                 if self.OpenAPIDataInfoArr != nil{
-                    var radomIntArr = [arc4random_uniform(199),arc4random_uniform(199),arc4random_uniform(199)]
+                    var radomIntArr = [arc4random_uniform(131),arc4random_uniform(131),arc4random_uniform(131)]
                     print("OpneApi관련 데이터를 RTDB에서 앱으로 다 불러왔다!")
                     print("현재 OpenApiDataArr에  저장된 데이터 중 1번째 인덱스에 포함된 데이터  : \(self.OpenAPIDataInfoArr[1])")
                     for data in 0...radomIntArr.count-1 {

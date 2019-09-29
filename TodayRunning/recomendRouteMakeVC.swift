@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import NMapsMap
+import FCAlertView
 
 class recomendRouteMakeVC : UIViewController, UIScrollViewDelegate, UINavigationBarDelegate, NMFMapViewDelegate{
     
@@ -167,25 +168,60 @@ class recomendRouteMakeVC : UIViewController, UIScrollViewDelegate, UINavigation
         self.addMapView(lat: self.cameraLat, lng: self.cameraLng)
         
     }
-    
+    func emptyAlert(){
+        
+        var alert = FCAlertView()
+                
+        //        alert.delegate = self
+                alert.makeAlertTypeWarning()
+                alert.colorScheme = .gray
+                alert.firstButtonTitleColor = .white
+                alert.firstButtonBackgroundColor = .gray
+                
+                alert.addButton("확인") {
+                    print("빈칸 체크 용  경고창이 나오고 확인 버튼 클릭")
+                   
+                }
+        
+                alert.hideDoneButton = true
+
+                alert.showAlert(inView: self,
+                                withTitle: nil,
+                                withSubtitle: "빈칸을 전부 채워주세요!!",
+                                withCustomImage: nil,
+                                withDoneButtonTitle: nil,
+                                andButtons: nil)
+    }
     @objc func backButtonPress(_ sender: Any){
         self.presentingViewController?.dismiss(animated: true, completion: nil)
         
     }
     
+    func recomandInfoSendFd(_ completion : () -> (Void)){
+        var dataSendFB = dataSendFireBase(spotLat: self.recomendSpotLat!, spotLng: self.recomendSpotLng!, title: self.recomendRTTitle.text!, reson: self.recomendReson.text, address: self.recomendSpotAddress!)
+        dataSendFB.sendDataRTDBForRecomendSpot()
+        completion()
+    }
+    
     @objc func uploadRrcomendRoute(_: Any){
         //note: 추천루트를 업로드 하는 로직(아직 구상하지 로직을 짜지 않음)
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
-        var dataSendFB = dataSendFireBase(spotLat: self.recomendSpotLat!, spotLng: self.recomendSpotLng!, title: self.recomendRTTitle.text!, reson: self.recomendReson.text, address: self.recomendSpotAddress!)
-        dataSendFB.sendDataRTDBForRecomendSpot()
-        self.presentingViewController?.dismiss(animated: true){
+        
+        if (self.recomendRTTitle.text != ""), (self.recomendReson.text != ""), (self.recomendLocation.text != ""){
+            
+              self.recomandInfoSendFd(){
+        
             appDelegate.ReloadRTDB.recommendSpotReload(){
                 //note : recomendSpotReload의 클로져를 매개변수로 전달시킴
+                  self.presentingViewController?.dismiss(animated: true)
                 print("recomendSpotReload메소드가 실행되어서 RTDB에 데이터를 가져옴")
             }
         }
-        
-        
+        }
+        else{
+            self.emptyAlert()
+        }
+      
     }
     
     
