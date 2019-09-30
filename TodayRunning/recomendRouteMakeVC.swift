@@ -6,6 +6,13 @@
 //  Copyright © 2019 김재석. All rights reserved.
 //
 
+//  recomendRouteMakeVC.swift
+//  TodayRunning
+//
+//  Created by 김재석 on 18/09/2019.
+//  Copyright © 2019 김재석. All rights reserved.
+//
+
 import Foundation
 import UIKit
 import NMapsMap

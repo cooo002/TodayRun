@@ -136,6 +136,8 @@ class configureVC: UITableViewController, UINavigationControllerDelegate, UIImag
     
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        //note :  사진 선택이 완료되면 실행되는 메소드
+        
         
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var img = info[UIImagePickerController.InfoKey.editedImage] as! UIImage

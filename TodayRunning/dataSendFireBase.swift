@@ -33,6 +33,7 @@ class dataSendFireBase{
     var recomendTitle : String?
     var recomendReson : String?
     var recomendUserImgUrl : String?
+    var recomendCourseImgUrl : String?
     
     
     
@@ -73,6 +74,7 @@ class dataSendFireBase{
     
     
     func sendDataRTDBForRecomendSpot(){
+        //completion리아는  클로져 인자를 추가하고 그 클로져 인자로 이미지를 업로드하는 메소드를 받아오자!!
         self.uid = self.appDelegate.userProperty.readString(key: "uid")
         //        var test_name = self.Userproperty.readString(key: "name")
         //        print("plist에 저장된 name? : \(test_name)")
@@ -93,6 +95,8 @@ class dataSendFireBase{
         self.ref.child("ios/recomendRouteInfo/\(key!)/spotLat").setValue(self.recomendSpotLat as! Double)
         self.ref.child("ios/recomendRouteInfo/\(key!)/spotLng").setValue(self.recomendSpotLng as! Double)
         self.ref.child("ios/recomendRouteInfo/\(key!)/recomendSpotAutoID").setValue(key as! NSString)
+      
+        
         print("db로 데이터 업로드 완료!!")
         
     }

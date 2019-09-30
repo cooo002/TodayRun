@@ -9,6 +9,8 @@
 import Foundation
 import Firebase
 import UIKit
+import FCAlertView
+
 
 class reloadRTDB: UIViewController {
     //note: RTDB에서 방정보를 가져와서 그것을 저장하는 dic, arr 이다.
@@ -74,7 +76,7 @@ class reloadRTDB: UIViewController {
    
     }
     
-    func initNoticeInfoReload( _ log : (() -> Void)?, _ completion : @escaping () -> (Void) ){
+    func initNoticeInfoReload( _ log : (() -> Void)?, _ completion : @escaping () -> (Void) ){ // note : 앱 실행시 팀원 모집 정보를 가져온느 메소드
         var ref = Database.database().reference()
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var signUp = appDelegate.userProperty.readBool(key: "signUP")
@@ -189,23 +191,28 @@ class reloadRTDB: UIViewController {
         }
     
     
-    func attempCheck(_ crewTitle : String, _ attempPersonUid : Array<String> , _ execute : () -> (Void)){
+    func attempCheck(_ crewTitle : String, _ attempPersonUid : Array<String>,_ selectVC : selectCrewCellVC , _ execute : () -> (Void)){
         //note: 전달받은 방의 제목으로 RTDB에서 검색을하고 만약 일치하는게 있다면 그 방의 attempPerson 키에 새로 참여한 인원의 uid를 추가한다.
         var ref = Database.database().reference()
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var attempUid = attempPersonUid
+        var selectVC = selectVC
         
         
         if attempUid.contains(appDelegate.userProperty.readString(key: "uid")!) {
-            //note: attempPersonUid 에 현재 유저의 uid가 포함되어 있는 경우 (alert 창을 띄어서 현재 유저가 이미 이 방에 참여했다는 것을 알려주자!!!
+            
             execute()
+
             
         }
         else{ //note : attempPersonUid 에 현재 ㅇ유저의 uidrk포함되어 있지 않다면 추가시켜 주는 로직
             attempUid.append(appDelegate.userProperty.readString(key: "uid")!)
             var childUpdate = [ "attempPersonUid" : attempUid]// note: 여기서 value 값에 배열이 들어가야한다!!!( 그래서 내가 생각한 방법은 기존에 attempPerson 배열을 가져와서 겨기다가 새롭게 추가되는 인원의 uid를 append 시키는 방법을 사용할 것이다.)
             ref.child("ios/runnigNoticeBoard/\(crewTitle)/").updateChildValues(childUpdate)
-            
+//           execute()
+            DispatchQueue.main.async {
+                selectVC.attempTableView.reloadData()
+            }
         }
     }
     

@@ -4,6 +4,7 @@
 //
 //  Created by 김재석 on 15/09/2019.
 //  Copyright © 2019 김재석. All rights reserved.
+// 
 //
 
 import Foundation
@@ -117,11 +118,16 @@ class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSo
                         self.verticalScrollView.xr.endHeaderRefreshing()
                         }
         
-
+//  note: OpenAPIDataInfoForRecomendArr 에는 추천 코스에 대한 정보 중 랜덤 3개를 뽑아서 집어 넣는것이다.
         
         for i in 0 ..< appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr.count{
             var imageView = UIImageView()
-            imageView.image = UIImage(named: self.pageImgArr[i])
+//            imageView.image = UIImage(named: appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[i]["p_img"] as! String)
+//            var textLabel = UILabel()
+////            textLabel.
+//            textLabel.text = "뛰기 좋은 길"
+//            textLabel.minimumScaleFactor = 20
+            imageView.sd_setImage(with: URL(string: appDelegate.ReloadRTDB.OpenAPIDataInfoForRecomendArr[i]["p_img"] as! String), completed: nil)//note :  이 부분 부터 시작!!!
             imageView.contentMode = .scaleAspectFit//note: 이미지를 이미지 뷰에 맞춰주는 코드
             //note: 여기서 이미지 뷰를 탭 했을 경우 액션이 발행 하도록 해줘야 한다
             let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapGestureAction(_:)))
@@ -133,7 +139,7 @@ class recomandCourseVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             imageView.frame = CGRect(x: xPosition, y: 0, width: self.pageView.frame.width, height:
                 self.pageView.frame.width)//note: 새로운 이미지 뷰의 크기 및 위치
             self.horizontalScrollView.contentSize = CGSize(width: self.pageView.frame.width*CGFloat(1+i), height: self.pageView.frame.height)//note: 스크롤 뷰의 컨텐츠 뷰를
-      
+//            imageView.addSubview(textLabel)
             self.horizontalScrollView.addSubview(imageView)
             
         }

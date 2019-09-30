@@ -104,6 +104,7 @@ class MainViewController: UITableViewController, UINavigationControllerDelegate,
         
         super.viewDidLoad()
             
+        self.tabBarController?.tabBar.isHidden = false
         self.navigationController?.navigationBar.isHidden = true
         //        let floaty = Floaty(frame : CGRect(x: self.view.frame.width - 35, y: self.view.frame.height - 100, width: 30, height: 30))
           let floaty = Floaty()
@@ -144,6 +145,7 @@ class MainViewController: UITableViewController, UINavigationControllerDelegate,
     override func viewWillAppear(_ animated: Bool) {
 //        self.appDelegate.ReloadRTDB.reloadDataForViewWillAppear()
          self.navigationController?.navigationBar.isHidden = true
+        self.tabBarController?.tabBar.isHidden = false
     
 //
     }
