@@ -133,7 +133,9 @@ class MainViewController: UITableViewController, UINavigationControllerDelegate,
         print("titleArr의 엘레멘트 갯수 : \(self.appDelegate.ReloadRTDB.titleArr.count)")//note : 파싱을 해야한다
         print("infoArr의 타입은? : \(type(of: self.appDelegate.ReloadRTDB.infoArr))")//note : 파싱을 해야한다
 //        print("infoArr은 : \(type(of: self.appDelegate.ReloadRTDB.infoArr[0]["numOfPeople"]) )")//note : 파싱을 해야한다
-        
+        print("mainView가 실행되면서 property에 저장된 현재 로그인한 유저의 정보는:\(self.appDelegate.userProperty.readString(key: "name"))")
+        print("mainView가 실행되면서 property에 저장된 현재 로그인한 유저의 정보는:\(self.appDelegate.userProperty.readString(key: "uid"))")
+        print("mainView가 실행되면서 property에 저장된 현재 로그인한 유저의 정보는:\(self.appDelegate.userProperty.readString(key: "gender"))")
 
         }
 

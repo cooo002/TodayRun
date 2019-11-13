@@ -30,6 +30,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
     
     func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error?) {
         // ...
+        
+        print("구글 로그인 메소드 실행! ")
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
     
         if let error = error {
@@ -40,7 +42,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
         let credential = GoogleAuthProvider.credential(withIDToken: authentication.idToken,
                                                        accessToken: authentication.accessToken)
         // ...
-        Auth.auth().signIn(with: credential) { (authResult, error) in
+        Auth.auth().signIn(with: credential) { (user, error) in
+            print("auth객체에 정의된 signIn 메소드 실행")
             if let error = error {
                 // ...
                 return
@@ -53,28 +56,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
                 if let user = user {
                 
                     gogleloginUid = user.uid
-                
-                    appDelegate.ReloadRTDB.researchingOfSignIn(gogleloginUid!){
+                    
+                    appDelegate.ReloadRTDB.serchingUserInfoAfterLogIn(gogleloginUid!){
                         self.userProperty.writeBool(bool: true, key: "signUp")
                         self.userProperty.writeString(string: gogleloginUid!, key: "uid")
-                        print("해당 구글 이메일로 회원 가입을 한 적이이 있는지 체크하는 메소드 호출하여 실해됨")
-                }
-//
+                        // note: 일단 여기가지는 무리없이 진행됨
+                        
+                        
+                        print("구글 로그인 후 유저의 uid를 이용해서 DB에 저장된 유저의 정보를 가져오는 메소드 실해!")
+                        
+                        defer{
+                            appDelegate.ReloadRTDB.researchingOfSignIn(gogleloginUid!){
+                            print("구글 이메일로 로그인 했던적을 확인하고 적절한 뷰로 이동!!")
+                            }
+                        }
+                        
+                    }
                 //               note: propertyList에 uid가 잘 저장되었는지 확인하는 체크용!!
                     print("현재 로그인한 유저는\(gogleloginUid)")
 //                print("저장된 uid\(self.userProperty.readString(key: "uid"))")
                 }
-            
-        
-        
         }
-     
     }
     
    
     //note: 구글 로그인을 메소드
     func sign(_ signIn: GIDSignIn!, didDisconnectWith user: GIDGoogleUser!, withError error: Error!) {
-        // Perform any operations when the user disconnects from app here.
+        // Perform any operations when the user disconnects from app here. 로그아웃 부분??
+        
         // ...
     }
     //note: 구글 로그인을 위한 메소드
@@ -91,6 +100,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
                                                                                                                                                                      sourceApplication: sourceApplication,
                                                                                                                                                                      annotation: annotation)
     }
+    
+    
+    
     
     func selectVC(_ signUp : Bool){
         if signUp {

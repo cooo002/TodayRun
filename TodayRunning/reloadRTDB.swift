@@ -46,7 +46,7 @@ class reloadRTDB: UIViewController {
         
                 
                 ref.child("ios/userInfo/\(uid)").observeSingleEvent(of: .value) { (snapshot) in
-                    
+            
                     self.window = UIWindow(frame: UIScreen.main.bounds)
                     userInfoCheckDic = snapshot.value as? Dictionary<String, String>
                     
@@ -63,7 +63,7 @@ class reloadRTDB: UIViewController {
                         
                     }
                     else{
-                        
+                        // 처음 회원가입하는 경우 실행되는 로직이다 .
                          let mainStoryBoard = UIStoryboard(name: "Main", bundle: nil)
                                          let mainViewController = mainStoryBoard.instantiateViewController(withIdentifier: "_ProfileInit2")
                                          self.present(mainViewController, animated: true)
@@ -81,6 +81,9 @@ class reloadRTDB: UIViewController {
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var signUp = appDelegate.userProperty.readBool(key: "signUP")
 //        var signUp = false
+        defer{
+            // note:화면이동 로직을 가장 마지막에 실행되도록 defer 구문을 사용햇다!!
+            
         ref.child("ios/runnigNoticeBoard").observeSingleEvent(of: .value) { (snapshot) in
             
         //note:  한번 리스너가 연결되어 호출되면 이후 해당 경로를 포함한 하위 데이터의 변경일 있을 때만다 이 리스너가 호출된다.
@@ -110,6 +113,7 @@ class reloadRTDB: UIViewController {
              else{
                 print("reloadRTDB에서 noticeInfoReload메소드 실행!!")
                 completion()
+            }
             }
         }
             
