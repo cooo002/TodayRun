@@ -20,7 +20,9 @@ import FCAlertView
 class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSource, NMFMapViewDelegate{
     
     
-
+    @IBOutlet weak var infoTapbar: UIButton!
+    
+    @IBOutlet weak var noticeBoardTapbar: UIButton!
     
     @IBAction func backAction(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
@@ -55,7 +57,23 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     var attempPersonInfoArr : Array<String>?
     
     var selectCrewIndex : Int? // 선택한 팀원 모집에 인데슥 번호를 저장하는 변수다.
+    
+    
 
+    @IBAction func infoTapbarAction(_ sender: Any) {
+        // 정보 탭바를 선택했을 때의 액션 메소드
+        infoTapbar.backgroundColor = .gray
+        noticeBoardTapbar.backgroundColor = .darkGray
+        self.infoTapBarSelect()
+        
+    }
+    @IBAction func noticeBoardTapbarAction(_ sender: Any) {
+        // 게시판 탭바를 선택했을 때 액션 메소드
+        noticeBoardTapbar.backgroundColor = .gray
+        infoTapbar.backgroundColor = .darkGray
+        self.noticeBoardTapBarSelect()
+        
+    }
     @IBAction func attempAction(_ sender: Any) { //note: 참여하기 버튼을 누를 경우 실행되는 메소드
         // note: uid를 매개변수로 날리고 그
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -81,18 +99,8 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
                                                withCustomImage: nil,
                                                withDoneButtonTitle: nil,
                                                andButtons: nil)
-            
-          
-           
         }
-        
-        
-        
     }
-    
-
-    
-    
     
 //    var viewTapBarTop : UIView = UIView()
     var buttonTapBarItemInfo : UIButton?
@@ -134,103 +142,63 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         
     }
+    func infoTapBarSelect(){
+        // Todo: info tapbar 클랙햇을 때 실행되는 로직!!!
+        
+         print(" 메인화면에서 전달 받은 팅원 모집 공고에 참여한 유저의 uid 모음 : \(self.attempPersonUidArr)")
+        
+                self.navigationController?.navigationBar.isHidden = false
+                var departureMarker = NMFMarker()
+                var destinationMarker = NMFMarker()
+                
+        //        self.tabBarController?.tabBar.isHidden = true
+        //
+                var width = self.view.frame.width / 2
+                var height : CGFloat = 30
+                var x : CGFloat = 0
+        //        var y :  CGFloat = 0
+                var y :  CGFloat = 0
+              
+                self.notice.isEditable = false
+                self.notice.text = self.crewNotice//note: 출발지에서 받아온 정보를 도착지에 뷰에 적용시키는 부분이다 .
+                self.crewName.text = self.crewTitle
+                
+                
+                self.attempTableView.delegate = self
+                self.attempTableView.dataSource = self
+                
+                self.NaverMapView = NMFNaverMapView(frame: CGRect(x: 0 , y: 0, width: self.map.frame.width, height: self.map.frame.height))
+                //note: 지도의 카메라의 위치를 출발지에 대한 위도, 경도로 설정해준다. 그르면 초기에 지도가 켜질때 이 위치를 기준으로 잡히게된다.
+                self.NaverMapView!.delegate = self
+                var DEFAULT_CAMERA_POSITION = NMFCameraPosition(NMGLatLng(lat: self.departureLat! , lng: departureLng! ), zoom: 14, tilt: 0, heading: 0)
+                self.NaverMapView!.mapView.moveCamera(NMFCameraUpdate(position: DEFAULT_CAMERA_POSITION))
+                
+                departureMarker.position = NMGLatLng(lat: self.departureLat!, lng: self.departureLng!)
+                departureMarker.captionText = "출발지"
+                departureMarker.mapView = self.NaverMapView?.mapView
+                
+                destinationMarker.position = NMGLatLng(lat: self.destinationLat!, lng: self.destinationLng!)
+                destinationMarker.captionText = "도착지"
+                destinationMarker.mapView = self.NaverMapView?.mapView
+                
+                self.map.addSubview(self.NaverMapView!)
+    }
     
-//
-//    func addTabBarBtn(btn : UIButton , title : String, tag : Int){
-//              btn.setTitle(title, for: .normal)
-//        btn.tag = tag
-//
-//        btn.setTitleColor(.white, for: .selected)
-//        btn.setTitleColor(.gray, for: .normal)
-//
-//            btn.addTarget(self, action: #selector(self.onTabButtonBarItem(_ :)), for: .touchUpInside)
-//
-//            self.viewTapBarTop.addSubview(btn)
-////        }
-////
-//    func addTopTabBar(_ completion : () -> (Void)){
-//                var width = self.view.frame.width
-//                var height : CGFloat = 30
-//                var x : CGFloat = 0
-//                var y :  CGFloat = 0
-//        //         (self.navigationController?.navigationBar.frame.height)!
-//
-//
-//                var tapBtnWidth = self.viewTapBarTop.frame.width / 2
-//                var tapBtnHeight = self.viewTapBarTop.frame.height
-//
-//               self.buttonTapBarItemInfo = UIButton( frame: CGRect(x: x, y: y, width: tapBtnWidth, height: tapBtnHeight))
-//                self.buttonTapBarItemNotice = UIButton( frame: CGRect(x: tapBtnWidth, y: y, width: tapBtnWidth, height: tapBtnHeight))
-//
-//                self.viewTapBarTop =  UIView(frame: CGRect(x: x, y: y, width: width, height: height))
-//                self.viewTapBarTop.backgroundColor = .gray
-////                self.view.bringSubviewToFront(self.viewTapBarTop)
-////        self.view.addSubview(self.viewTapBarTop)
-////
-////        self.buttonTapBarItemInfo.titleLabel?.text = "개인 정보"
-//
-//
-//
-////        self.addTabBarBtn(btn: self.buttonTapBarItemInfo!, title: "기본정보", tag: 0)
-////             self.addTabBarBtn(btn: self.buttonTapBarItemNotice!, title: "게시판", tag: 1)
-//
-//             completion()
-//
-//
-//
-//    }
+    func noticeBoardTapBarSelect(){
+        
+//        self.view.subviews[1].removeFromSuperview()
+        //이렇게 뷰에 대한 서브뷰인 스크롤 뷰를 지우면 그에 포함되는 뷰들인 버튼, 지도, textField 등도
+        //전부 지워져서 그 다음 infoTapBarSelect() 메소드를 실행하면 해당 메소들 실해을 위해 존재해야하는
+        //뷰들이 사라졌으니 정보를 뿌려주고싶어도 그 정보를 받아 줄 수 가 없어서 에러가 발생한다!! 이것을 수정하자
+    }
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(" 메인화면에서 전달 받은 팅원 모집 공고에 참여한 유저의 uid 모음 : \(self.attempPersonUidArr)")
-        self.navigationController?.navigationBar.isHidden = false
-        var departureMarker = NMFMarker()
-        var destinationMarker = NMFMarker()
-        
-//        self.tabBarController?.tabBar.isHidden = true
-//
-        var width = self.view.frame.width / 2
-        var height : CGFloat = 30
-        var x : CGFloat = 0
-//        var y :  CGFloat = 0
-        var y :  CGFloat = 0
-               //         (self.navigationController?.navigationBar.frame.height)!
-                       
-//        
-//        self.buttonTapBarItemNotice = UIButton(frame: CGRect(x: x, y: y, width: width, height: height))
-//        self.buttonTapBarItemNotice?.setTitle("게시판", for: .normal)
-//        self.buttonTapBarItemInfo = UIButton(frame: CGRect(x: width, y: y, width: width, height: height))
-//        self.buttonTapBarItemInfo?.setTitle("기본정보", for: .normal)
-//        self.view.addSubview(buttonTapBarItemInfo!)
-//        self.view.addSubview(buttonTapBarItemNotice!)
-//
-        self.notice.isEditable = false
-        self.notice.text = self.crewNotice//note: 출발지에서 받아온 정보를 도착지에 뷰에 적용시키는 부분이다 .
-        self.crewName.text = self.crewTitle
-        
-        
-        self.attempTableView.delegate = self
-        self.attempTableView.dataSource = self
-        
-        self.NaverMapView = NMFNaverMapView(frame: CGRect(x: 0 , y: 0, width: self.map.frame.width, height: self.map.frame.height))
-        //note: 지도의 카메라의 위치를 출발지에 대한 위도, 경도로 설정해준다. 그르면 초기에 지도가 켜질때 이 위치를 기준으로 잡히게된다.
-        self.NaverMapView!.delegate = self
-        var DEFAULT_CAMERA_POSITION = NMFCameraPosition(NMGLatLng(lat: self.departureLat! , lng: departureLng! ), zoom: 14, tilt: 0, heading: 0)
-        self.NaverMapView!.mapView.moveCamera(NMFCameraUpdate(position: DEFAULT_CAMERA_POSITION))
-        
-        departureMarker.position = NMGLatLng(lat: self.departureLat!, lng: self.departureLng!)
-        departureMarker.captionText = "출발지"
-        departureMarker.mapView = self.NaverMapView?.mapView
-        
-        destinationMarker.position = NMGLatLng(lat: self.destinationLat!, lng: self.destinationLng!)
-        destinationMarker.captionText = "도착지"
-        destinationMarker.mapView = self.NaverMapView?.mapView
-        
-        self.map.addSubview(self.NaverMapView!)
-        
-
-
+        // NARK: 이 로직 전부를 하나의 메소드로 만들고 탭을 클릭함으로써 새로운 뷰가 나오도록 하고 다시 돌아오면 해당 메소드
+        //를 실행시켜서 초기 화면으로 보이도록 해주는 로직을 사용한다?? ( 일단 내 생각임!)
+        self.infoTapBarSelect()
+       
     }
     
     

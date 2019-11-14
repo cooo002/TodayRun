@@ -47,6 +47,11 @@ class signViewController:UIViewController, GIDSignInUIDelegate{
 
         override func viewDidLoad() {
         super.viewDidLoad()
+            
+//            GIDSignIn.sharedInstance()?.presentingViewController = self 
+            
+//            GIDSignIn.sharedInstance().signIn() 
+            
             self.googleLoginButton.layer.cornerRadius = self.googleLoginButton.bounds.width / 12
             self.googleLoginButton.layer.borderWidth = 0
             self.googleLoginButton.layer.masksToBounds = true
