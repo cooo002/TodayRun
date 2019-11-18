@@ -164,6 +164,7 @@ class recomendRouteMakeVC : UIViewController, UIScrollViewDelegate, UINavigation
         let alert = UIAlertController(title: nil, message: "일치하는 지역이 없습니다 다시 입력해주세요", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
         self.present(alert, animated: true, completion: nil)
+        
     }
     
     override func viewDidLoad() {
@@ -219,6 +220,7 @@ class recomendRouteMakeVC : UIViewController, UIScrollViewDelegate, UINavigation
               self.recomandInfoSendFd(){
         
             appDelegate.ReloadRTDB.recommendSpotReload(){
+                
                 //note : recomendSpotReload의 클로져를 매개변수로 전달시킴
                   self.presentingViewController?.dismiss(animated: true)
                 print("recomendSpotReload메소드가 실행되어서 RTDB에 데이터를 가져옴")

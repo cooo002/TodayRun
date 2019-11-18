@@ -33,6 +33,7 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     @IBOutlet weak var attempTableView: UITableView!
     
+    
     @IBOutlet weak var attemp: UIButton!
     
     @IBOutlet weak var crewName: UILabel!
@@ -58,24 +59,26 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     var selectCrewIndex : Int? // 선택한 팀원 모집에 인데슥 번호를 저장하는 변수다.
     
+//    var noticeTapVC :
     
 
     @IBAction func infoTapbarAction(_ sender: Any) {
-        // 정보 탭바를 선택했을 때의 액션 메소드
+        // 정보 탭바를 선택했을 때의 액션 메소드(이건 더이상 버꿀께 없다)
         infoTapbar.backgroundColor = .gray
         noticeBoardTapbar.backgroundColor = .darkGray
         self.infoTapBarSelect()
         
     }
     @IBAction func noticeBoardTapbarAction(_ sender: Any) {
-        // 게시판 탭바를 선택했을 때 액션 메소드
+        // 게시판 탭바를 선택했을 때 액션 메소드(게시판 뷰룰 새로 만들어주자!)
+        
         noticeBoardTapbar.backgroundColor = .gray
         infoTapbar.backgroundColor = .darkGray
         self.noticeBoardTapBarSelect()
         
     }
     @IBAction func attempAction(_ sender: Any) { //note: 참여하기 버튼을 누를 경우 실행되는 메소드
-        // note: uid를 매개변수로 날리고 그
+        // note: uid를 매개변수로 날리고
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.ReloadRTDB.attempCheck( crewName.text!, self.attempPersonUidArr!, self) { () -> (Void) in
            var alert = FCAlertView()
@@ -144,7 +147,18 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     func infoTapBarSelect(){
         // Todo: info tapbar 클랙햇을 때 실행되는 로직!!!
-        
+        var subViewCount = self.view.subviews.count
+        var removeCallOfNum = subViewCount - 2
+        print(subViewCount)
+//
+//        if subViewCount > 2{
+//            self.view.addSubview(self.view.subviews[subViewCount - 2])
+//        }
+        if subViewCount > 2{
+            for i in 1...removeCallOfNum{//note: 추가된 subView 횟수만큼 지워지게 for문으로 돌린다.
+            self.view.subviews.last?.removeFromSuperview()
+            }
+        }
          print(" 메인화면에서 전달 받은 팅원 모집 공고에 참여한 유저의 uid 모음 : \(self.attempPersonUidArr)")
         
                 self.navigationController?.navigationBar.isHidden = false
@@ -185,6 +199,23 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     func noticeBoardTapBarSelect(){
+        // 새로운 뷰를 기존 뷰 위에 덮어씌우는 방식을 사용한다?
+//        noticeVC = Notice
+//        var noiceTapBarVC = NoticeTapBarVC()
+        
+//        NoticeTapBarVC.delegate = self
+        
+//        func tableView()
+        
+
+        var noticeViewSize = CGRect(x: 0, y: self.noticeBoardTapbar.frame.height  , width: self.view.frame.width, height: self.view.frame.height)
+        var noticeViewAfterTap = NoticeTapBarView(frame: noticeViewSize)
+        
+//        noticeViewAfterTap.delegate = self
+//        var noticeView = UIView(frame: CGRect(x: 0, y: ((self.view.superview?.frame.height)! - self.infoTapbar.frame.height), width: self.view.frame.width, height: (self.view.superview?.frame.height)!))
+//        print("\(self.view.superview)") // 부보뷰 출력!!
+        self.view.addSubview(noticeViewAfterTap)
+        
         
 //        self.view.subviews[1].removeFromSuperview()
         //이렇게 뷰에 대한 서브뷰인 스크롤 뷰를 지우면 그에 포함되는 뷰들인 버튼, 지도, textField 등도
@@ -197,6 +228,7 @@ class selectCrewCellVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         super.viewDidLoad()
         // NARK: 이 로직 전부를 하나의 메소드로 만들고 탭을 클릭함으로써 새로운 뷰가 나오도록 하고 다시 돌아오면 해당 메소드
         //를 실행시켜서 초기 화면으로 보이도록 해주는 로직을 사용한다?? ( 일단 내 생각임!)
+        
         self.infoTapBarSelect()
        
     }

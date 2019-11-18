@@ -17,11 +17,17 @@ class reloadRTDB: UIViewController {
     var notictlist : Dictionary<String, Any>?
     var titleArr : Array<String>  = []// 각 방의 타이틀이 들어간다
     var infoArr: Array<Dictionary<String, Any>> = []
+    //note:현재 앱의 만들어진 방에 대한 정보가 저장된 array다.
+    
     
     //note: RTDB에서 유저 정보를 가져와서 그것을 저장하는 di,arr 이다.
     var attempPersonNumArr : Array<String> = [] // note: 타이틀을 저장하는 배열
     var userInfoDic : Dictionary<String, String>?
     var userInfoCheckDic : Dictionary<String, String>?
+    var userInfoDicValArr : Dictionary<String, Array<String>>? //note:회원이 가입한 크루들의 명단을 저장하지 위해 일단
+    // 해당 회원의 모든 정보를 array 타입의 value를 갖는 dictionary를 만들어준것이다.
+//    var userSignUpCrewList : Array<String> = []
+    
     
     
     //note : RTDBD에서 추천스팟에 대한 정보를 가져와서 그것을 저장하는 dic, arr 이다.
@@ -67,11 +73,9 @@ class reloadRTDB: UIViewController {
                          let mainStoryBoard = UIStoryboard(name: "Main", bundle: nil)
                                          let mainViewController = mainStoryBoard.instantiateViewController(withIdentifier: "_ProfileInit2")
                                          self.present(mainViewController, animated: true)
-                        
                     }
         //            print("userInfoLocalDic에 저장된 데이터는? \(userInfoLocalDic)")
                     //note: 내가 파라미터로 받아온 uid에 따라서 해당 유저의 정보는 잘들어온다
-                   
                 }
    
     }
@@ -83,10 +87,8 @@ class reloadRTDB: UIViewController {
 //        var signUp = false
         defer{
             // note:화면이동 로직을 가장 마지막에 실행되도록 defer 구문을 사용햇다!!
-            
         ref.child("ios/runnigNoticeBoard").observeSingleEvent(of: .value) { (snapshot) in
-            
-        //note:  한번 리스너가 연결되어 호출되면 이후 해당 경로를 포함한 하위 데이터의 변경일 있을 때만다 이 리스너가 호출된다.
+                    //note:  한번 리스너가 연결되어 호출되면 이후 해당 경로를 포함한 하위 데이터의 변경일 있을 때만다 이 리스너가 호출된다.
             
             // note: 확인 해보니 인자로 전달 받은 클로져가 해당 함수가 종료되고 바로 실행되는게 아닌것 같아.다른 메소드를 실행하고 그 다음에 클로져의 정의된 내용을 실행하게된다. (이유를 알자!
             
@@ -116,7 +118,6 @@ class reloadRTDB: UIViewController {
             }
             }
         }
-            
     } // note : observer 의 끝!!!!
     
     
@@ -158,7 +159,7 @@ class reloadRTDB: UIViewController {
                     completion()
                 }
             }
-                }// note : observer 의 끝!!!!
+        }// note : observer 의 끝!!!!
         
     
     
@@ -172,6 +173,7 @@ class reloadRTDB: UIViewController {
             appDelegate.userProperty.writeString(string:  appDelegate.ReloadRTDB.userInfoDic!["name"]!, key:"name")
             appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["birth"]!, key: "birth")
             appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["gender"]!, key: "gender" )
+            
             select()
         }
     }
@@ -179,15 +181,26 @@ class reloadRTDB: UIViewController {
     func serchingUserInfo(_ uid : String, _ select : @escaping () -> (Void)){  //note: 파라미터로 넘어온 uid에 해당하는 유저의 img url을 넘겨주는 메소드
         var ref = Database.database().reference()
         var userInfoLocalDic : Dictionary<String, String>?
+        var appDelegate = UIApplication.shared.delegate as! AppDelegate
         
         
         ref.child("ios/userInfo/\(uid)").observeSingleEvent(of: .value) { (snapshot) in
             
             userInfoLocalDic = snapshot.value as? Dictionary<String, String>
+//            self.userInfoDicValArr  = snapshot.value as? Dictionary<String, Array<String>>
 //            print("userInfoLocalDic에 저장된 데이터는? \(userInfoLocalDic)")
             //note: 내가 파라미터로 받아온 uid에 따라서 해당 유저의 정보는 잘들어온다
             self.userInfoDic = userInfoLocalDic
+            //  참여 크루 목록이 추가되면 그것을 받아올 때 해당 데이터를 받아오는 데이터 자료 구조가  Dictionary<String, String> 인데
+            // 참여 가입 크루 목록이  Dictionary<String, Array<String>>이여서 데이터 저장이 안 되는거!!!)
+            // 이런식으러 userInfoDic을 Dictionary<String, Any>? 타입으로 바꿔주자!!!
+            
+//            appDelegate.userSignUpCrewList.append(userInfoLocalDic!["signUpCrewList"]!)
+            
+            
             print("userInfoDic에 저장된 데이터는(serching 메소드에서 실행된 로그)? \(self.userInfoDic)")
+            print("userInfoDicValArr에 저장된 데이터는(serching 메소드에서 실행된 로그)? \(self.userInfoDicValArr)")
+            
             print("serchingUserInfo 메소드 실해!")
             select()
         }
@@ -201,9 +214,11 @@ class reloadRTDB: UIViewController {
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var attempUid = attempPersonUid
         var selectVC = selectVC
-        
+        var userUid = appDelegate.userProperty.readString(key: "uid")
         
         if attempUid.contains(appDelegate.userProperty.readString(key: "uid")!) {
+            // 참여하기 버튼을 누르면 해당 방안에 내가 참여해는지 검색을 하고 만약 참여한 상태이면 아래
+            // 매개변수로 받아온 클로져를 실해하면 된다.
             
             execute()
 
@@ -212,12 +227,62 @@ class reloadRTDB: UIViewController {
         else{ //note : attempPersonUid 에 현재 ㅇ유저의 uidrk포함되어 있지 않다면 추가시켜 주는 로직
             attempUid.append(appDelegate.userProperty.readString(key: "uid")!)
             var childUpdate = [ "attempPersonUid" : attempUid]// note: 여기서 value 값에 배열이 들어가야한다!!!( 그래서 내가 생각한 방법은 기존에 attempPerson 배열을 가져와서 겨기다가 새롭게 추가되는 인원의 uid를 append 시키는 방법을 사용할 것이다.)
-            ref.child("ios/runnigNoticeBoard/\(crewTitle)/").updateChildValues(childUpdate)
+//            var signUpCrewUpdate = [ "signUpCrew" : crewTitle]// 현재 가입한 크루의 제목들이 저장되는 딕셔너리이다.
+       
+            
+            ref.child("ios/runnigNoticeBoard/\(crewTitle)/").updateChildValues(childUpdate)//ToDo: Db에 참여한 회원의 uid를 저장해주는 부분이다.
+//            ref.child("ios/userInfo/\(userUid)/").updateChildValues(signUpCrewUpdate)
+            
+            self.updateSignUPCrewList(crewName: crewTitle)
 //           execute()
             DispatchQueue.main.async {
                 selectVC.attempTableView.reloadData()
             }
         }
+    }
+    
+    func updateSignUPCrewList(crewName: String){//ToDo: 매개변수로 받은 크루의 이름을 이용해서 현 회원이 가입한 크루의 list를 최신화 해주는 메소드이다.
+        var appDelegate = UIApplication.shared.delegate as! AppDelegate
+        var ref = Database.database().reference()
+        var userUid = appDelegate.userProperty.readString(key: "uid")
+//        appDelegate.userSignUpCrewList.append(crewName)
+        reloadUserInfo()
+//        for i in userInfoDic["signUpCrewList"]{
+        var crewName = ["signUpCrewList":appDelegate.userSignUpCrewList]
+//
+//        }
+        print("현재 userSignUpCrewList에 저장된 값은? : \(appDelegate.userSignUpCrewList)")
+           //note: 아직 다른 크루를 한번도 가입한 적이 없는 상태이다 .
+        defer {
+        ref.child("ios/userInfo/\(userUid!)/").updateChildValues(crewName)
+        }
+        
+    }
+    
+    func reloadUserInfo(){
+        //현재 유저의 정보를 불러오는 메소드이다.
+
+        var ref = Database.database().reference()
+        var userInfoLocalDic : Dictionary<String, String>?
+        var appDelegate = UIApplication.shared.delegate as! AppDelegate
+        var uid = appDelegate.userProperty.readString(key: "uid")
+                
+                
+        ref.child("ios/userInfo/\(uid)").observeSingleEvent(of: .value) { (snapshot) in
+                    
+        userInfoLocalDic = snapshot.value as? Dictionary<String, String>
+    //            self.userInfoDicValArr  = snapshot.value as? Dictionary<String, Array<String>>
+        //            print("userInfoLocalDic에 저장된 데이터는? \(userInfoLocalDic)")
+                    //note: 내가 파라미터로 받아온 uid에 따라서 해당 유저의 정보는 잘들어온다
+        self.userInfoDic = userInfoLocalDic
+        appDelegate.userSignUpCrewList.append(userInfoLocalDic!["signUpCrewList"]!)
+//        appDelegate.userSignUpCrewList.append(crewName)
+                    
+        print("userInfoDic에 저장된 데이터는(serching 메소드에서 실행된 로그)? \(self.userInfoDic)")
+        print("userInfoDicValArr에 저장된 데이터는(serching 메소드에서 실행된 로그)? \(self.userInfoDicValArr)")
+                
+        print("serchingUserInfo 메소드 실해!")
+    }
     }
     
     //note: 추천스팟에 대한 데이터를 RTDB에서 불러오는 것
@@ -345,6 +410,7 @@ class reloadRTDB: UIViewController {
            
         }
     }
-    
-    }
+}
 
+
+    
