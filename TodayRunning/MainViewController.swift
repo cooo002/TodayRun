@@ -34,7 +34,7 @@ class MainViewController: UITableViewController, UINavigationControllerDelegate,
     
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        self.checkCellReloadNum = 0; // note: refresh 할 때 데이터 불러오는게 완료되었는지 확인하기 위한 체크용 변수
+        self.checkCellReloadNum = 0 // note: refresh 할 때 데이터 불러오는게 완료되었는지 확인하기 위한 체크용 변수
         return appDelegate.ReloadRTDB.titleArr.count
         
         
@@ -59,7 +59,7 @@ class MainViewController: UITableViewController, UINavigationControllerDelegate,
 
         
         
-        self.cell?.boardImg.sd_setImage(with: URL(string:  self.appDelegate.ReloadRTDB.infoArr[indexPath.row]["captinImg"] as! String) )
+        self.cell?.boardImg.sd_setImage(with: URL(string:  self.appDelegate.ReloadRTDB.infoArr[indexPath.row]["captinImg"] as! String))
         return self.cell!
     }
     
@@ -146,8 +146,8 @@ class MainViewController: UITableViewController, UINavigationControllerDelegate,
     
     override func viewWillAppear(_ animated: Bool) {
 //        self.appDelegate.ReloadRTDB.reloadDataForViewWillAppear()
-         self.navigationController?.navigationBar.isHidden = true
-        self.tabBarController?.tabBar.isHidden = false
+         self.navigationController?.navigationBar.isHidden = false// 뷰에서 네비게이션 바를 감춰주는 것
+        self.tabBarController?.tabBar.isHidden = false//
     
 //
     }

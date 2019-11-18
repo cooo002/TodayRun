@@ -26,6 +26,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
     var ReloadRTDB = reloadRTDB()
     //note: 구글 로그인을 위한 delegate 메소드
     
+    var userSignUpCrewList : Array<String> = []
+    
     
     
     func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error?) {
@@ -181,6 +183,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
                     // 뷰 컨트롤러 인스턴스
                     let viewController = secondStoryboard.instantiateViewController(withIdentifier: "secondStoryBoard")
                     
+                    
+//                    self.ReloadRTDB.signUpCrewJudgeMent()
+                    
                     // 윈도우의 루트 뷰 컨트롤러 설정
                     self.window?.rootViewController = viewController
                     
@@ -198,6 +203,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
                     
                 }
                 // 이제 화면에 보여주자.
+                self.ReloadRTDB.signUpCrewJudgeMent()
                 self.window?.makeKeyAndVisible()
             }
               

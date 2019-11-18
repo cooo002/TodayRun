@@ -22,11 +22,11 @@ class reloadRTDB: UIViewController {
     
     //note: RTDB에서 유저 정보를 가져와서 그것을 저장하는 di,arr 이다.
     var attempPersonNumArr : Array<String> = [] // note: 타이틀을 저장하는 배열
-    var userInfoDic : Dictionary<String, String>?
+    var userInfoDic : Dictionary<String, Any>? //note: <String, Any> 타입으로 바꿔줬다!! 원래는 <String, String> 타입이다.
     var userInfoCheckDic : Dictionary<String, String>?
-    var userInfoDicValArr : Dictionary<String, Array<String>>? //note:회원이 가입한 크루들의 명단을 저장하지 위해 일단
+    var userInfoDicValArr : Dictionary<String,Any>? //note:회원이 가입한 크루들의 명단을 저장하지 위해 일단
     // 해당 회원의 모든 정보를 array 타입의 value를 갖는 dictionary를 만들어준것이다.
-//    var userSignUpCrewList : Array<String> = []
+    var userSignUpCrewList : Array<String> = []
     
     
     
@@ -109,6 +109,8 @@ class reloadRTDB: UIViewController {
                         print("Divtionnary 타입을 저장하도록하는 infArr의 저장돈 값은? : \(self.infoArr)")
                         print("reloadRTDB에서 noticeInfoReload메소드 실행!!")
                     }
+//                    self.signUpCrewJudgeMent()
+                    
                     completion()
                     }
             }
@@ -169,10 +171,10 @@ class reloadRTDB: UIViewController {
         
         self.serchingUserInfo(uid) { () -> (Void) in
             var appDelegate = UIApplication.shared.delegate as! AppDelegate
-            appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["profileImg"]!, key:"img" )
-            appDelegate.userProperty.writeString(string:  appDelegate.ReloadRTDB.userInfoDic!["name"]!, key:"name")
-            appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["birth"]!, key: "birth")
-            appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["gender"]!, key: "gender" )
+            appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["profileImg"]! as! String, key:"img" )
+            appDelegate.userProperty.writeString(string:  appDelegate.ReloadRTDB.userInfoDic!["name"]! as! String, key:"name")
+            appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["birth"]! as! String, key: "birth")
+            appDelegate.userProperty.writeString(string: appDelegate.ReloadRTDB.userInfoDic!["gender"]! as! String, key: "gender" )
             
             select()
         }
@@ -180,13 +182,15 @@ class reloadRTDB: UIViewController {
     
     func serchingUserInfo(_ uid : String, _ select : @escaping () -> (Void)){  //note: 파라미터로 넘어온 uid에 해당하는 유저의 img url을 넘겨주는 메소드
         var ref = Database.database().reference()
-        var userInfoLocalDic : Dictionary<String, String>?
+        var userInfoLocalDic : Dictionary<String, Any>?
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         
         
         ref.child("ios/userInfo/\(uid)").observeSingleEvent(of: .value) { (snapshot) in
             
-            userInfoLocalDic = snapshot.value as? Dictionary<String, String>
+//            userInfoLocalDic = snapshot.value as! Dictionary<String, Any> as! Dictionary<String, String>
+            userInfoLocalDic = snapshot.value as! Dictionary<String, Any>
+            // note: 이 부분을 다운 캐스팅함!! 이것 기억하자!!!
 //            self.userInfoDicValArr  = snapshot.value as? Dictionary<String, Array<String>>
 //            print("userInfoLocalDic에 저장된 데이터는? \(userInfoLocalDic)")
             //note: 내가 파라미터로 받아온 uid에 따라서 해당 유저의 정보는 잘들어온다
@@ -239,19 +243,23 @@ class reloadRTDB: UIViewController {
                 selectVC.attempTableView.reloadData()
             }
         }
+          print("signUPCrewJudgemetn메소드의 실행결과 infoValue에 저장된 값은? \(self.userInfoDicValArr)")
+        
     }
     
     func updateSignUPCrewList(crewName: String){//ToDo: 매개변수로 받은 크루의 이름을 이용해서 현 회원이 가입한 크루의 list를 최신화 해주는 메소드이다.
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var ref = Database.database().reference()
         var userUid = appDelegate.userProperty.readString(key: "uid")
-//        appDelegate.userSignUpCrewList.append(crewName)
-        reloadUserInfo()
+        appDelegate.userSignUpCrewList.append(crewName)
+//        reloadUserInfo()
 //        for i in userInfoDic["signUpCrewList"]{
+        
         var crewName = ["signUpCrewList":appDelegate.userSignUpCrewList]
 //
-//        }
+//
         print("현재 userSignUpCrewList에 저장된 값은? : \(appDelegate.userSignUpCrewList)")
+      
            //note: 아직 다른 크루를 한번도 가입한 적이 없는 상태이다 .
         defer {
         ref.child("ios/userInfo/\(userUid!)/").updateChildValues(crewName)
@@ -259,28 +267,57 @@ class reloadRTDB: UIViewController {
         
     }
     
-    func reloadUserInfo(){
+    func signUpCrewJudgeMent(){
         //현재 유저의 정보를 불러오는 메소드이다.
-
+        
+        //ToDo: 처음에 이 메소드가 실행되면 현재 유저가 userInfoLocalDic이 비어있는지 안 비었는지 체크하고
+        //비었으면 signUpCrewList를 RTDB에 만들어주고 signUpCrewList가 안 비어있으면 이번에 가입하려는 크루의 제목을
+        //배열에 그대로 추가해준다.
+        
+//
         var ref = Database.database().reference()
-        var userInfoLocalDic : Dictionary<String, String>?
+//        var userInfoLocalDic : Dictionary<String, Any>?
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var uid = appDelegate.userProperty.readString(key: "uid")
-                
-                
+//
+        
+        
+//        if (ref.child("ios/userInfo/\(uid)").value(forKey: "birth") != nil){
+//            print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 있습니다.")
+//
+//        }
+//        else{
+//            print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 없습니다.")
+//
+//        }
         ref.child("ios/userInfo/\(uid)").observeSingleEvent(of: .value) { (snapshot) in
-                    
-        userInfoLocalDic = snapshot.value as? Dictionary<String, String>
+                
+        
     //            self.userInfoDicValArr  = snapshot.value as? Dictionary<String, Array<String>>
         //            print("userInfoLocalDic에 저장된 데이터는? \(userInfoLocalDic)")
                     //note: 내가 파라미터로 받아온 uid에 따라서 해당 유저의 정보는 잘들어온다
-        self.userInfoDic = userInfoLocalDic
-        appDelegate.userSignUpCrewList.append(userInfoLocalDic!["signUpCrewList"]!)
+//        self.userInfoDic = userInfoLocalDic
+            //note: userInfoDic에 signUpCrewList가 만들어져있으면 그대ㅗㄹ 추가하고
+//            appDelegate.userSignUpCrewList.append(userInfoLocalDic!["signUpCrewList"] as! String)
 //        appDelegate.userSignUpCrewList.append(crewName)
-                    
+            var infoValue = snapshot.value as? Dictionary<String, Any>
+            
+            self.userInfoDicValArr = snapshot.value as? Dictionary<String, Any>
+            defer{
+                print("signUPCrewJudgemetn메소드의 실행결과 infoValue에 저장된 값은? \(self.userInfoDicValArr)")
+            }
+//            if snapshot.value != nil{
+//                print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 있습니다.")
+//                print("현재 로그인한 유저의 userInfo/signUpCrewList에 저장된 snapshot Value는? \(snapshot.value)")
+//                //
+//            }
+//            else{
+//                  print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 없습니다.")
+//            }
+
         print("userInfoDic에 저장된 데이터는(serching 메소드에서 실행된 로그)? \(self.userInfoDic)")
         print("userInfoDicValArr에 저장된 데이터는(serching 메소드에서 실행된 로그)? \(self.userInfoDicValArr)")
-                
+
         print("serchingUserInfo 메소드 실해!")
     }
     }

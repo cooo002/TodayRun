@@ -145,6 +145,9 @@ class RunningBoardMadeVC:  UITableViewController, UINavigationControllerDelegate
             self.ref.child("ios/runnigNoticeBoard/\(self.boardTitle!.text!)/title").setValue(self.notice!.text as! NSString)
             self.ref.child("ios/runnigNoticeBoard/\(self.boardTitle!.text!)/centerLocation").setValue(self.centerLocation! )
             self.ref.child("ios/runnigNoticeBoard/\(self.boardTitle!.text!)/attempPersonUid").setValue(attempPersonUidArr) // note : 참여하는 인원들이 저장되는 키값이다( 방을 만들 때 자동적으로 방장을 참여하느 것이니 추가 시켜주자!)
+            self.appDelegate.ReloadRTDB.updateSignUPCrewList(crewName: self.boardTitle!.text!)
+            // note:  크루를 만들고 여기서 확인 버튼을 누르면 updateSignUPCrewList이 실행된다.!!
+            
             print("db로 데이터 업로드 완료!!")
             print("RTDB레퍼런스가 아직 안 만들어졌다!")
             completion()
