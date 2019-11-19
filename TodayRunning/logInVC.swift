@@ -103,6 +103,7 @@ class  logInVC: UIViewController {
                             //note: 여기서 유저 정볼르 검핵하는 메소드를 이용해서 로인한 유저의 메소드를 잧아와서 propertyㅣist에 저장하자
                             self?.appDelegate.ReloadRTDB.serchingUserInfoAfterLogIn(emailloginUid!){
                                 print("properyList 저장을 위해서 로그인한 우저의 uid를 넘김")
+                                appDelegate.ReloadRTDB.signUpCrewJudgeMent()
                             }
                               self!.signInFinishAlert()
                     }

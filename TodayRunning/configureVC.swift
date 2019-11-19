@@ -39,9 +39,11 @@ class configureVC: UITableViewController, UINavigationControllerDelegate, UIImag
     
         let firebaseAuth = Auth.auth()//
         do {
-            try firebaseAuth.signOut()
+            try firebaseAuth.signOut() // note: 로그아웃 처리함
             self.appDelegate.userProperty.writeBool(bool: false, key: "signUp")
-           
+            self.appDelegate.userSignUpCrewList.removeAll() //note: 로그아웃을 하면 새로운 유저가 로그인을 하게되므로
+            // 현재 유저가 가입한 크루들의 목록을 저장하는 userSignUpCrewList Array는 모두 지워줘야한다.
+            
             }
     
          catch let signOutError as NSError {

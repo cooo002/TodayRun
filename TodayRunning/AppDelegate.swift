@@ -203,17 +203,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
                     
                 }
                 // 이제 화면에 보여주자.
-                self.ReloadRTDB.signUpCrewJudgeMent()
+                
                 self.window?.makeKeyAndVisible()
             }
-              
         // note: 추천 스팟에 대한 정보를 불러오는 메소드이다
             self.ReloadRTDB.recommendSpotReload(){
                 print("추천스팟에 대한 데이터를 RTDB에서 전부 불러왔다")
             }
                 //note : 공공 데이터 포털에서 받아온 데이터를 저장한 RTDB에서 데이터를 불러오는 로직이다.
             self.ReloadRTDB.reloadOpenAPIData()
-            
+            self.ReloadRTDB.signUpCrewJudgeMent()
         }
 //        self.selectVC(checkingStory)
         return true
