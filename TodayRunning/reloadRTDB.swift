@@ -280,46 +280,33 @@ class reloadRTDB: UIViewController {
         var appDelegate = UIApplication.shared.delegate as! AppDelegate
         var uid = appDelegate.userProperty.readString(key: "uid")
 //
-        
-        
-//        if (ref.child("ios/userInfo/\(uid)").value(forKey: "birth") != nil){
-//            print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 있습니다.")
-//
-//        }
-//        else{
-//            print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 없습니다.")
-//
-//        }
-        ref.child("ios/userInfo/\(uid)").observeSingleEvent(of: .value) { (snapshot) in
-                
-        
-    //            self.userInfoDicValArr  = snapshot.value as? Dictionary<String, Array<String>>
-        //            print("userInfoLocalDic에 저장된 데이터는? \(userInfoLocalDic)")
-                    //note: 내가 파라미터로 받아온 uid에 따라서 해당 유저의 정보는 잘들어온다
-//        self.userInfoDic = userInfoLocalDic
-            //note: userInfoDic에 signUpCrewList가 만들어져있으면 그대ㅗㄹ 추가하고
-//            appDelegate.userSignUpCrewList.append(userInfoLocalDic!["signUpCrewList"] as! String)
-//        appDelegate.userSignUpCrewList.append(crewName)
-            var infoValue = snapshot.value as? Dictionary<String, Any>
+        print("signUpCrewList가 실행되면서 현재 로그인한 유저의 uid는 \(uid)")
+
+        ref.child("ios/userInfo/\(uid!)/signUpCrewList").observeSingleEvent(of: DataEventType.value) { (snapshot) in
+
+            print("signUpCrewList에 저장된 snapShot.value의 값은? : \(type(of: snapshot.value!))")
+//            appDelegate.userSignUpCrewList = snapshot.value as! Array<String>
             
-            self.userInfoDicValArr = snapshot.value as? Dictionary<String, Any>
-            defer{
-                print("signUPCrewJudgemetn메소드의 실행결과 infoValue에 저장된 값은? \(self.userInfoDicValArr)")
+            if snapshot.value! != nil && type(of: snapshot.value!) != NSNull.self {// note: signUpCrewList에 값이 있으니까 저장된 값을 가져와서 appDelegate.userCrewList에 저장해준다!!
+                
+                //note: 분명 signUpCrewList에 저장된 값이 없는데 왜  값이 저장되어있다고 나오지??
+                // nil을 강제로 Rj
+                
+                print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 있습니다.")
+                print("현재 로그인한 유저의 userInfo/signUpCrewList에 저장된 snapshot Value는? \(snapshot.value as! Array<Any>)")
+                appDelegate.userSignUpCrewList = snapshot.value as! Array<String>
+                self.userInfoDicValArr = snapshot.value as? Dictionary<String, Any>
+                print("현재 로그인한 유저의 appDelegate.userSignUpCrewList에 저장된 값은? \(appDelegate.userSignUpCrewList)")
+                //
             }
-//            if snapshot.value != nil{
-//                print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 있습니다.")
-//                print("현재 로그인한 유저의 userInfo/signUpCrewList에 저장된 snapshot Value는? \(snapshot.value)")
-//                //
-//            }
-//            else{
-//                  print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 없습니다.")
-//            }
+            else{
+                  print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 없습니다.")
+            }
 
-        print("userInfoDic에 저장된 데이터는(serching 메소드에서 실행된 로그)? \(self.userInfoDic)")
-        print("userInfoDicValArr에 저장된 데이터는(serching 메소드에서 실행된 로그)? \(self.userInfoDicValArr)")
 
-        print("serchingUserInfo 메소드 실해!")
     }
+        print("스코프 밖에서 현재 로그인한 유저의 userInfo/signUpCrewList에 저장된 snapshot Value는? \(self.userInfoDicValArr)")
+        
     }
     
     //note: 추천스팟에 대한 데이터를 RTDB에서 불러오는 것
