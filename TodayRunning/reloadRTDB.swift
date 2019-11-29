@@ -27,6 +27,7 @@ class reloadRTDB: UIViewController {
     var userInfoDicValArr : Dictionary<String,Any>? //note:회원이 가입한 크루들의 명단을 저장하지 위해 일단
     // 해당 회원의 모든 정보를 array 타입의 value를 갖는 dictionary를 만들어준것이다.
     var userSignUpCrewList : Array<String> = []
+    var signUpCrewInfoDic : Array<Dictionary<String, Any>> = [] // note: 현재 로그인한 유저가 가입한 방에 대한 정보가 담기는 Dictionay!!
     
     
     
@@ -43,6 +44,8 @@ class reloadRTDB: UIViewController {
     var recomendSpotMadeUserDic : Dictionary<String, Any>?
     
     var window : UIWindow?
+    
+
     
     func researchingOfSignIn(_ uid : String, _ completion : () -> (Void)){
         // note : 로그아웃한 다음 구글로 다실 로그인 할 때 해당 아이디로 가입한 적이이 있는지 없는지를 확인하기위한 메소드
@@ -267,6 +270,39 @@ class reloadRTDB: UIViewController {
         
     }
     
+    func crewImgJudgeMentReload(crewName: String){
+        //ToDo: 메소드가 시작되면 해당 방에 사진에 대한 url이 들어있는지 확인한다.!!!
+        // 방에 활동 이미지가 있다면 그것을 배열에 담아둔다! 그리고 만약 방에 활동사진이 없다면
+        // 해당 배열은 빈배열로둔다. 그리고 이제 collectionOfCrewPhotoVC이 시작되면 배열에 있는
+        // 이미지를 하나씩 불러와서 셀에 반영해준다!
+        // 그리고 활동사진을 추가하면 해당 배열에 srorage에 올린 이미지의 url을 배열에 추가시켜주고 해당 배열 자체를 통으로
+        // 방 관련 db에 추가시켜준다.
+
+        var ref = Database.database().reference()
+        //        var userInfoLocalDic : Dictionary<String, Any>?
+        var appDelegate = UIApplication.shared.delegate as! AppDelegate
+        //
+        print("crewImgJudgeMentReload가 실행되면서 넘겨받은 방의 이름은? \(crewName)")
+
+        if crewName != nil {
+            ref.child("ios/runnigNoticeBoard/\(crewName)/ActivityImgUrl").observeSingleEvent(of: DataEventType.value) { (snapshot) in
+                //겅로에 데이터가 없으면 그냥 nil을 반환한다.
+                    appDelegate.crewImgArray.removeAll()
+            print("signUpCrewList에 저장된 snapShot.value의 값은? : \(type(of: snapshot.value!))")
+                if snapshot.value! != nil && type(of: snapshot.value!) != NSNull.self {// note: signUpCrewList에 값이 있으니까 저장된 값을 가져와서 appDelegate.userCrewList에 저장해준다!!
+                    appDelegate.crewImgArray.removeAll()
+                    appDelegate.crewImgArray = snapshot.value as! Array<String>
+                    print("현재 크루의 활동 사진은 다음과 같이 있습니다.\(appDelegate.crewImgArray)")
+                        //
+                    }
+                else{
+                    print("현재 크루의 활동 사진은 없습니다. ")
+                    }
+                }
+              }
+    }
+    
+    
     func signUpCrewJudgeMent(){
         //현재 유저의 정보를 불러오는 메소드이다.
         
@@ -282,8 +318,9 @@ class reloadRTDB: UIViewController {
 //
         print("signUpCrewList가 실행되면서 현재 로그인한 유저의 uid는 \(uid)")
 
+        if uid != nil {
         ref.child("ios/userInfo/\(uid!)/signUpCrewList").observeSingleEvent(of: DataEventType.value) { (snapshot) in
-
+        //겅로에 데이터가 없으면 그냥 nil을 반환한다.
             print("signUpCrewList에 저장된 snapShot.value의 값은? : \(type(of: snapshot.value!))")
 //            appDelegate.userSignUpCrewList = snapshot.value as! Array<String>
             
@@ -302,9 +339,12 @@ class reloadRTDB: UIViewController {
             else{
                   print("현재 로그인한 유저의 userInfo에는 singUpCrewList가 없습니다.")
             }
-
+            defer{
+                self.signUpCrewInfoExtraction()
+            }
 
     }
+        }
         print("스코프 밖에서 현재 로그인한 유저의 userInfo/signUpCrewList에 저장된 snapshot Value는? \(self.userInfoDicValArr)")
         
     }
@@ -434,6 +474,27 @@ class reloadRTDB: UIViewController {
            
         }
     }
+    // check: 회원이 가입한 크루의 정보를 뽑아오는 메소들 만들기부터 시작하기!!
+    func signUpCrewInfoExtraction(){
+        // ToDo: 가입한 크루의 정보를 추출하는 메소드
+        // note: 비동기로 돌아가도록 해줘야한다.(signUpCrewList메소드 실행 후 바로 실행할 것이다.)
+        var appDelegate = UIApplication.shared.delegate as! AppDelegate
+        var ref = Database.database().reference()
+        //note: appDelegate.userSignUpCrewList에 저장된 가입한 크루의 제목을 불러와서 그 제목으로 방에 대한 정보를 찾아와서 하는게 나은 방법??
+        //      VS 그냥 현재 앱에 만들어진 모든 방에 대한 정보를 전부 가져와서 그것을 따로 분류하는 것이 맞나???
+        signUpCrewInfoDic.removeAll() //note: 일단 빈배열로 만들어준다.
+        
+        for i in appDelegate.userSignUpCrewList{
+        //note: userSignUpCrewList에 저장된 제목들을 하나씩 불러오는 과정
+            ref.child("ios/runnigNoticeBoard/\(i as! String)").observeSingleEvent(of: DataEventType.value) { (snapshot) in
+        //note: 가입한 크루의 제목으로 RTDB에서 검색해서 해당 제목의 방에 대한 정보를 불러오는 과정
+                
+                print("snashot.value의 값은? : \(snapshot.value as! Dictionary<String, Any>)")
+                self.signUpCrewInfoDic.append(snapshot.value as! Dictionary<String, Any>)
+            }
+        }
+    }
+    
 }
 
 

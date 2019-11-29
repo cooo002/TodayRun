@@ -184,6 +184,7 @@ func emptyAlert(){
          self.navigationController?.navigationBar.isHidden = false
 
         self.navigationItem.title = "런닝메이트 만들기"
+//        self.tableView.select
      
 //        sendDataBtn.image = UIImage(contentsOfFile: "")
 //        self.navigationItem.rightBarButtonItem = sendDataBtn
@@ -199,6 +200,7 @@ func emptyAlert(){
     
     override func viewWillAppear(_ animated: Bool) { //note: 화면이 보일 때 마다 boardInfo에 저장된 위도, 경도롤 갱신!!
         self.navigationController?.navigationBar.isHidden = false
+        
         self.departureLat = appDelegate.boardInfo.departureLat
         self.departureLng = appDelegate.boardInfo.departureLng
         self.destinationLat = appDelegate.boardInfo.destinationLat

@@ -26,7 +26,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
     var ReloadRTDB = reloadRTDB()
     //note: 구글 로그인을 위한 delegate 메소드
     
+
+    
     var userSignUpCrewList : Array<String> = []
+    //ToDo: 현재 유저가 가입한 방에 제목들이 담기는 배열
+    
+    var crewImgArray : Array<String> = []
+    //ToDo: 현재 유저가 가입한 방에 제목들이 담기는 배열
+    
+    var signUpCrewInfoDic : Array<Dictionary<String, Any>> = [] // note: 현재 로그인한 유저가 가입한 방에 대한 정보가 담기는 Dictionay!!
+    
     
     
     
@@ -135,6 +144,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
+        UINavigationBar.appearance().tintColor = .white //note: 현재 앱 내의 모든 navigation의 색깔을 흰색으로 해주기 위해서 작성함
         self.window = UIWindow(frame: UIScreen.main.bounds)//note: 처음에 시작되는 stroryBoar를 정해주지 않는다면 이렇게 window 객체를 실제로 만들어서 사용해야한다.
         XRRefreshControlSettings.sharedSetting.configSettings(
                   animateTimeForAdjustContentInSetTop: 0.5,

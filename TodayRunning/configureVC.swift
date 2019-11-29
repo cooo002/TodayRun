@@ -121,7 +121,10 @@ class configureVC: UITableViewController, UINavigationControllerDelegate, UIImag
                     return
                 }
                 let urlimg = downloadURL.absoluteString
+                //check 여기서 방별로 RTDB에 저장되도록 만들어주자!
                 self.appDelegate.userProperty.writeString(string: urlimg, key: "img")
+                //check: 회원정보 DB에 변경된 사진의 url이 갱신 안되는거 같은데??
+                
                 
                 print("다운로드 url: \(urlimg)")
                 print("프로퍼티에 저장된 다운로드 url: \(self.appDelegate.userProperty.readString(key: "img"))")
@@ -158,6 +161,7 @@ class configureVC: UITableViewController, UINavigationControllerDelegate, UIImag
         self.profileImg.layer.cornerRadius = self.profileImg.frame.width / 2
       //  self.progfileImg.layer.borderWidth = 0
        // self.progfileImg.layer.masksToBounds = true
+        self.tableView.separatorStyle = .none
         let user = Auth.auth().currentUser
         
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
